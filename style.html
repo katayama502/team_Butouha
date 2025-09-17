@@ -2,38 +2,45 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>投稿フォーム</title>
-  <link rel="stylesheet" href="style2.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>お知らせを投稿</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <div class="container">
-    <h1 class="header">投稿</h1>
+<body class="page-post">
+  <header class="page-header">
+    <a class="back-link" href="form.html">&larr; 一覧に戻る</a>
+    <h1 class="page-title">投稿フォーム</h1>
+  </header>
 
-    <form id="postForm" action="upload.php" method="post" enctype="multipart/form-data">
-      <div class="title-section">
-        <label for="title">タイトル：</label>
-        <input type="text" id="title" name="title" required>
-        
-      </div>
+  <main class="post-main">
+    <div class="container">
+      <form id="postForm" action="upload.php" method="post" enctype="multipart/form-data">
+        <section class="title-section">
+          <label for="title">タイトル：</label>
+          <input type="text" id="title" name="title" required>
+        </section>
 
-      <div class="pdf-section">
-        <label for="pdf">PDFを添付：</label>
-        <input type="file" id="pdf" name="pdf" accept="application/pdf" required>
-      </div>
+        <section class="pdf-section">
+          <label for="pdf">PDFを添付：</label>
+          <input type="file" id="pdf" name="pdf" accept="application/pdf" required>
+        </section>
 
-      <div class="audio-section">
-        <h3>🎤音声を吹き込む</h3>
-        <button type="button" id="startBtn">録音開始</button>
-        <button type="button" id="stopBtn" disabled>録音停止</button><br>
-        <audio id="audioPlayback" controls></audio><br>
-        <input type="hidden" name="audioData" id="audioData">
-      </div>
+        <section class="audio-section">
+          <h2>🎤 音声を吹き込む</h2>
+          <div class="audio-controls">
+            <button type="button" id="startBtn">録音開始</button>
+            <button type="button" id="stopBtn" disabled>録音停止</button>
+          </div>
+          <audio id="audioPlayback" controls></audio>
+          <input type="hidden" name="audioData" id="audioData">
+        </section>
 
-      <div class="submit-btn">
-        <button type="submit">投稿する</button>
-      </div>
-    </form>
-  </div>
+        <div class="submit-btn">
+          <button type="submit">投稿する</button>
+        </div>
+      </form>
+    </div>
+  </main>
 
   <script>
     let mediaRecorder;
@@ -73,4 +80,3 @@
   </script>
 </body>
 </html>
-

@@ -3,21 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>投稿画面</title>
-  <link rel="stylesheet" href="style1.css" />
+  <title>重要なお知らせ一覧</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+<body class="page-important">
+  <header class="page-header">
+    <a class="back-link" href="index.php">&larr; トップへ戻る</a>
+    <h1 class="page-title">重要なお知らせ</h1>
+  </header>
 
-  <!-- 左上の大きな「重要」 -->
-  <div class="important-label">重要</div>
+  <main class="important-main">
+    <div class="important-label">重要</div>
 
-  <!-- 投稿一覧 -->
-  <div class="posts-container" id="postsContainer">
-    <!-- 投稿はJavaScriptで追加します -->
-  </div>
+    <div class="posts-container" id="postsContainer" aria-live="polite">
+      <!-- 投稿はJavaScriptで追加します -->
+    </div>
+  </main>
 
-  <!-- 右下の投稿ボタン -->
-  <button class="post-button" id="postButton">＋ 投稿</button>
+  <button class="post-button" id="postButton" type="button">＋ 投稿</button>
 
   <script src="script.js"></script>
 </body>
