@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>投稿フォーム</title>
+  <link rel="stylesheet" href="style2.css">
+</head>
+<body>
+  <div class="container">
+    <h1 class="header">投稿</h1>
+
+    <form id="postForm" action="upload.php" method="post" enctype="multipart/form-data">
+      <div class="title-section">
+        <label for="title">タイトル：</label>
+        <input type="text" id="title" name="title" required>
+        
+      </div>
+
+      <div class="pdf-section">
+        <label for="pdf">PDFを添付：</label>
+        <input type="file" id="pdf" name="pdf" accept="application/pdf" required>
+      </div>
+
+      <div class="audio-section">
+        <h3>🎤音声を吹き込む</h3>
+        <button type="button" id="startBtn">録音開始</button>
+        <button type="button" id="stopBtn" disabled>録音停止</button><br>
+        <audio id="audioPlayback" controls></audio><br>
+        <input type="hidden" name="audioData" id="audioData">
+      </div>
+
+      <div class="submit-btn">
+        <button type="submit">投稿する</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    let mediaRecorder;
+    let audioChunks = [];
+
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const audioPlayback = document.getElementById("audioPlayback");
+    const audioDataInput = document.getElementById("audioData");
+
+    startBtn.onclick = async () => {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+
+      audioChunks = [];
+      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          audioDataInput.value = reader.result; // base64で送信
+        };
+        reader.readAsDataURL(blob);
+        audioPlayback.src = URL.createObjectURL(blob);
+      };
+
+      mediaRecorder.start();
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+    };
+
+    stopBtn.onclick = () => {
+      mediaRecorder.stop();
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+    };
+  </script>
+</body>
+</html>
+
