@@ -16,8 +16,11 @@
     <div class="important-label">重要</div>
 
     <div class="posts-container" id="postsContainer" aria-live="polite">
-      <!-- 投稿はJavaScriptで追加します -->
+      <p class="post-message">投稿を読み込んでいます...</p>
     </div>
+    <noscript>
+      <p class="post-message">投稿一覧を表示するにはJavaScriptを有効にしてください。</p>
+    </noscript>
   </main>
 
   <button class="post-button" id="postButton" type="button">＋ 投稿</button>
