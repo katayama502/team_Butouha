@@ -200,6 +200,19 @@ main {
   font-weight: bold;
 }
 
+.home-error {
+  margin-top: 1.5rem;
+  color: #d32f2f;
+  line-height: 1.6;
+}
+
+.home-error small {
+  display: block;
+  margin-top: 0.5rem;
+  color: #9e1b1b;
+  word-break: break-all;
+}
+
 .count-list .label {
   font-size: 1rem;
 }
@@ -209,7 +222,7 @@ main {
 }
 
 /* =============================
-   重要お知らせ一覧 (form.html)
+   重要お知らせ一覧 (form.php)
    ============================= */
 .page-important {
   position: relative;
@@ -268,12 +281,53 @@ main {
   margin: 0;
 }
 
+.post-meta {
+  margin-top: 0.5rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.post-link {
+  display: inline-block;
+  margin-top: 0.75rem;
+  color: var(--color-primary);
+  font-weight: bold;
+}
+
+.post-link:hover,
+.post-link:focus {
+  text-decoration: underline;
+}
+
+.post-message {
+  margin: 0;
+  padding: 1.25rem;
+  background: var(--color-surface);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+  text-align: center;
+  color: #555;
+}
+
+.post-message.error {
+  color: #d32f2f;
+}
+
+.post-thumbnail {
+  display: inline-block;
+}
+
 .audio-icon {
   font-size: 28px;
   cursor: pointer;
   border: none;
   background: transparent;
   line-height: 1;
+}
+
+.audio-icon[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .audio-icon:hover,
@@ -363,6 +417,24 @@ main {
   cursor: pointer;
 }
 
+.recording-status {
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #555;
+  min-height: 1.5em;
+}
+
+.recording-status.status-error {
+  color: var(--color-important);
+  font-weight: bold;
+}
+
+.recording-status.status-success {
+  color: #2e7d32;
+  font-weight: bold;
+}
+
 .submit-btn {
   text-align: center;
   margin-top: 20px;
@@ -427,6 +499,26 @@ main {
   background: #f7f9fc;
   border-radius: 12px;
   padding: 0.75rem 1rem;
+}
+
+.upload-errors {
+  background: #fdecea;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  color: #c62828;
+  text-align: left;
+}
+
+.upload-errors ul {
+  margin: 0.5rem 0 0 1.25rem;
+}
+
+.upload-warning {
+  background: #fff8e1;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  color: #f57c00;
+  text-align: left;
 }
 
 /* =============================

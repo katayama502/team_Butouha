@@ -2,22 +2,20 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// データ読み込み
-$dataFile = __DIR__ . '/data.json';
-$posts = [];
-if (file_exists($dataFile)) {
-    $json = file_get_contents($dataFile);
-    $posts = json_decode($json, true) ?: [];
-}
+require_once __DIR__ . '/database.php';
 
-// カテゴリ別カウント
 $counts = ['重要' => 0, '地域貢献' => 0, 'その他' => 0];
-foreach ($posts as $p) {
-    if ($p['category'] === 'ボランティア') {
-        $counts['地域貢献']++;
-    } elseif (isset($counts[$p['category']])) {
-        $counts[$p['category']]++;
+$dbError = null;
+
+try {
+    $pdo = getPdo();
+    $stmt = $pdo->query('SELECT COUNT(*) AS total FROM posts');
+    $row = $stmt->fetch();
+    if ($row && isset($row['total'])) {
+        $counts['重要'] = (int) $row['total'];
     }
+} catch (Throwable $exception) {
+    $dbError = $exception->getMessage();
 }
 ?>
 <!doctype html>
@@ -32,7 +30,7 @@ foreach ($posts as $p) {
   <header class="home-header">
     <h1 class="main-title">お知らせ</h1>
     <nav class="tabs" aria-label="カテゴリ切り替え">
-      <a class="tab tab-link" data-cat="重要" href="form.html">重要 (<?= $counts['重要'] ?>)</a>
+      <a class="tab tab-link" data-cat="重要" href="form.php">重要 (<?= $counts['重要'] ?>)</a>
       <span class="tab tab-disabled" data-cat="地域貢献" aria-disabled="true">地域貢献 (<?= $counts['地域貢献'] ?>)</span>
       <span class="tab tab-disabled" data-cat="その他" aria-disabled="true">その他 (<?= $counts['その他'] ?>)</span>
     </nav>
@@ -48,10 +46,13 @@ foreach ($posts as $p) {
         <li><span class="label">地域貢献</span><span class="value"><?= $counts['地域貢献'] ?>件</span></li>
         <li><span class="label">その他</span><span class="value"><?= $counts['その他'] ?>件</span></li>
       </ul>
+      <?php if ($dbError): ?>
+        <p class="home-error">データベースに接続できませんでした。設定を確認してください。<br><small><?= htmlspecialchars($dbError, ENT_QUOTES, 'UTF-8') ?></small></p>
+      <?php endif; ?>
     </section>
 
     <section class="cta-section">
-      <a href="form.html" class="cta-button">重要なお知らせ一覧を見る</a>
+      <a href="form.php" class="cta-button">重要なお知らせ一覧を見る</a>
     </section>
   </main>
 </body>
