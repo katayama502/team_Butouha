@@ -356,7 +356,7 @@ main {
 }
 
 /* =============================
-   投稿フォーム (style.html)
+   投稿フォーム (post_form.php)
    ============================= */
 .page-post {
   background-color: #f4f4f4;
@@ -377,6 +377,13 @@ main {
   padding: 30px;
   border-radius: 12px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.post-category,
+.upload-category {
+  margin: 0 0 1.5rem;
+  font-weight: bold;
+  text-align: center;
 }
 
 .title-section,

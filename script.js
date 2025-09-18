@@ -1,7 +1,7 @@
 const postsContainer = document.getElementById('postsContainer');
 const postButton = document.getElementById('postButton');
 
-const POSTS_ENDPOINT = 'posts.php';
+const POSTS_ENDPOINT = postsContainer?.dataset.endpoint || 'posts.php';
 const PDF_PLACEHOLDER = 'https://via.placeholder.com/120x160.png?text=PDF';
 let currentAudio = null;
 let currentAudioButton = null;
@@ -201,6 +201,7 @@ if (postsContainer) {
 
 if (postButton) {
   postButton.addEventListener('click', () => {
-    window.location.href = 'style.html';
+    const target = postButton.dataset.targetForm || 'post_form.php';
+    window.location.href = target;
   });
 }
