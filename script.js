@@ -1,5 +1,6 @@
 const postsContainer = document.getElementById('postsContainer');
 const postButton = document.getElementById('postButton');
+const pageCategory = document.body?.dataset.category || '';
 
 const POSTS_ENDPOINT = postsContainer?.dataset.endpoint || 'posts.php';
 const PDF_PLACEHOLDER = 'https://via.placeholder.com/120x160.png?text=PDF';
@@ -199,9 +200,46 @@ if (postsContainer) {
   loadPosts();
 }
 
+function buildPostFormUrl(baseUrl, categoryKey) {
+  if (!categoryKey) {
+    return baseUrl;
+  }
+
+  try {
+    const url = new URL(baseUrl, window.location.href);
+    if (!url.searchParams.has('category')) {
+      url.searchParams.set('category', categoryKey);
+    }
+    return url.href;
+  } catch (error) {
+    if (baseUrl.includes('category=')) {
+      return baseUrl;
+    }
+
+    const separator = baseUrl.includes('?') ? '&' : '?';
+    return `${baseUrl}${separator}category=${encodeURIComponent(categoryKey)}`;
+  }
+}
+
 if (postButton) {
   postButton.addEventListener('click', () => {
     const target = postButton.dataset.targetForm || 'post_form.php';
-    window.location.href = target;
+    const destination = buildPostFormUrl(target, pageCategory);
+
+    if (pageCategory) {
+      try {
+        sessionStorage.setItem('selectedCategory', pageCategory);
+      } catch (storageError) {
+        // storage が利用できない環境では何もしません
+      }
+    } else {
+      try {
+        sessionStorage.removeItem('selectedCategory');
+      } catch (removeError) {
+        // storage が利用できない環境では何もしません
+      }
+    }
+
+    window.location.href = destination;
   });
 }
