@@ -30,3 +30,14 @@ CREATE TABLE IF NOT EXISTS `other_posts` (
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `reservations` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `room` ENUM('large','small') NOT NULL,
+  `datetime` DATETIME NOT NULL,
+  `name` VARCHAR(100) NOT NULL,
+  `note` TEXT DEFAULT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `room_datetime_unique` (`room`, `datetime`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
