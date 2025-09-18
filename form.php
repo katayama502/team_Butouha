@@ -17,7 +17,7 @@ $user = getAuthenticatedUser();
     <h1 class="page-title">重要なお知らせ</h1>
     <div class="user-menu">
       <span class="user-menu__label"><?= htmlspecialchars(($user['display_name'] ?? '') . '（' . (($user['role'] ?? '') === 'admin' ? '管理者' : '一般ユーザー') . '）', ENT_QUOTES, 'UTF-8') ?></span>
-      <a class="user-menu__link" href="reservations.php">会議室予約</a>
+      <a class="user-menu__link" href="admin_calendar.php">会議室予約</a>
       <a class="user-menu__link" href="logout.php">ログアウト</a>
     </div>
   </header>

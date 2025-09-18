@@ -77,13 +77,14 @@ if ($errors) {
 
 try {
     $pdo = getPdo();
-    $stmt = $pdo->prepare('INSERT INTO reservations (room, reserved_at, user_id, reserved_for, note) VALUES (:room, :reserved_at, :user_id, :reserved_for, :note)');
+    $stmt = $pdo->prepare('INSERT INTO reservations (room, reserved_at, user_id, reserved_for, note, document_path) VALUES (:room, :reserved_at, :user_id, :reserved_for, :note, :document_path)');
     $stmt->execute([
         ':room' => $room,
         ':reserved_at' => $reservedAt->format('Y-m-d H:i:s'),
         ':user_id' => $user['id'],
         ':reserved_for' => $displayName !== '' ? $displayName : '利用者',
         ':note' => $note !== '' ? $note : null,
+        ':document_path' => null,
     ]);
 
     header('Content-Type: application/json; charset=UTF-8');
@@ -94,6 +95,7 @@ try {
             'reserved_at' => $reservedAt->format('Y-m-d\TH:i'),
             'reserved_for' => $displayName !== '' ? $displayName : '利用者',
             'note' => $note,
+            'document_path' => null,
         ],
         'message' => sprintf('%sを%sに予約しました。', $validRooms[$room], $reservedAt->format('Y/m/d H:i')),
     ]);

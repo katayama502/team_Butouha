@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $reservations = [];
 try {
     $pdo = getPdo();
-    $stmt = $pdo->query('SELECT r.id, r.room, r.reserved_at, r.reserved_for, r.note, r.created_at, u.display_name, u.role FROM reservations r INNER JOIN app_users u ON u.id = r.user_id ORDER BY r.reserved_at ASC');
+    $stmt = $pdo->query('SELECT r.id, r.room, r.reserved_at, r.reserved_for, r.note, r.document_path, r.created_at, u.display_name, u.role FROM reservations r INNER JOIN app_users u ON u.id = r.user_id ORDER BY r.reserved_at ASC');
     $reservations = $stmt->fetchAll();
 } catch (Throwable $exception) {
     $errors[] = '予約一覧を取得できませんでした。';
@@ -150,6 +150,9 @@ try {
                 <p>登録者：<?= htmlspecialchars($reservation['display_name'], ENT_QUOTES, 'UTF-8') ?>（<?= $reservation['role'] === 'admin' ? '管理者' : '一般ユーザー' ?>）</p>
                 <?php if (!empty($reservation['note'])): ?>
                   <p>備考：<?= nl2br(htmlspecialchars($reservation['note'], ENT_QUOTES, 'UTF-8')) ?></p>
+                <?php endif; ?>
+                <?php if (!empty($reservation['document_path'])): ?>
+                  <p><a class="reservation-card__attachment" href="<?= htmlspecialchars($reservation['document_path'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">📄 添付PDFを開く</a></p>
                 <?php endif; ?>
               </div>
             </li>

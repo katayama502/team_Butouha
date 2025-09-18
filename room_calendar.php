@@ -48,7 +48,7 @@ $reservationMap = [];
 $errorMessage = '';
 try {
     $pdo = getPdo();
-    $stmt = $pdo->prepare('SELECT reserved_at, reserved_for, note FROM reservations WHERE room = :room AND reserved_at >= :start AND reserved_at < :end ORDER BY reserved_at');
+    $stmt = $pdo->prepare('SELECT reserved_at, reserved_for, note, document_path FROM reservations WHERE room = :room AND reserved_at >= :start AND reserved_at < :end ORDER BY reserved_at');
     $stmt->execute([
         ':room' => $room,
         ':start' => $weekStart->format('Y-m-d H:i:s'),
@@ -63,6 +63,7 @@ try {
         $reservationMap[$slotKey] = [
             'reserved_for' => $row['reserved_for'],
             'note' => $row['note'] ?? '',
+            'document_path' => $row['document_path'] ?? null,
         ];
     }
 } catch (Throwable $exception) {
@@ -170,6 +171,9 @@ $todayKey = $today->format('Y-m-d');
                       <div class="reservation-chip__content">
                         <span class="reservation-chip__title"><?= htmlspecialchars($note, ENT_QUOTES, 'UTF-8') ?></span>
                         <span class="reservation-chip__meta">担当：<?= htmlspecialchars($reservation['reserved_for'], ENT_QUOTES, 'UTF-8') ?></span>
+                        <?php if (!empty($reservation['document_path'])): ?>
+                          <a class="reservation-chip__attachment" href="<?= htmlspecialchars($reservation['document_path'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">📄 資料を見る</a>
+                        <?php endif; ?>
                       </div>
                     </div>
                   <?php else: ?>
