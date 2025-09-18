@@ -6,9 +6,22 @@ header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/database.php';
 
+$categories = require __DIR__ . '/categories.php';
+$categoryKey = isset($_GET['category']) ? (string) $_GET['category'] : 'important';
+
+if (!isset($categories[$categoryKey])) {
+    http_response_code(400);
+    echo json_encode([
+        'error' => '指定されたカテゴリは存在しません。',
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+$table = $categories[$categoryKey]['table'];
+
 try {
     $pdo = getPdo();
-    $stmt = $pdo->query('SELECT id, title, pdf_path, audio_path, created_at FROM posts ORDER BY created_at DESC');
+    $stmt = $pdo->query(sprintf('SELECT id, title, pdf_path, audio_path, created_at FROM `%s` ORDER BY created_at DESC', $table));
     $rows = $stmt->fetchAll();
 
     echo json_encode([

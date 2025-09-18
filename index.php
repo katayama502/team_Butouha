@@ -4,15 +4,23 @@ error_reporting(E_ALL);
 
 require_once __DIR__ . '/database.php';
 
-$counts = ['重要' => 0, '地域貢献' => 0, 'その他' => 0];
+$categories = require __DIR__ . '/categories.php';
+$counts = [];
+foreach ($categories as $category) {
+    $counts[$category['label']] = 0;
+}
+
 $dbError = null;
 
 try {
     $pdo = getPdo();
-    $stmt = $pdo->query('SELECT COUNT(*) AS total FROM posts');
-    $row = $stmt->fetch();
-    if ($row && isset($row['total'])) {
-        $counts['重要'] = (int) $row['total'];
+    foreach ($categories as $category) {
+        $table = $category['table'];
+        $stmt = $pdo->query(sprintf('SELECT COUNT(*) AS total FROM `%s`', $table));
+        $row = $stmt->fetch();
+        if ($row && isset($row['total'])) {
+            $counts[$category['label']] = (int) $row['total'];
+        }
     }
 } catch (Throwable $exception) {
     $dbError = $exception->getMessage();

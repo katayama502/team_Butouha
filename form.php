@@ -6,7 +6,7 @@
   <title>重要なお知らせ一覧</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-<body class="page-important">
+<body class="page-important" data-category="important">
   <header class="page-header">
     <a class="back-link" href="index.php">&larr; トップへ戻る</a>
     <h1 class="page-title">重要なお知らせ</h1>
@@ -15,7 +15,7 @@
   <main class="important-main">
     <div class="important-label">重要</div>
 
-    <div class="posts-container" id="postsContainer" aria-live="polite">
+    <div class="posts-container" id="postsContainer" aria-live="polite" data-endpoint="posts.php?category=important">
       <p class="post-message">投稿を読み込んでいます...</p>
     </div>
     <noscript>
@@ -23,7 +23,7 @@
     </noscript>
   </main>
 
-  <button class="post-button" id="postButton" type="button">＋ 投稿</button>
+  <button class="post-button" id="postButton" type="button" data-target-form="post_form.php?category=important">＋ 投稿</button>
 
   <script src="script.js"></script>
 </body>

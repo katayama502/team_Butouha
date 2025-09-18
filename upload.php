@@ -4,6 +4,14 @@ error_reporting(E_ALL);
 
 require_once __DIR__ . '/database.php';
 
+$categories = require __DIR__ . '/categories.php';
+$categoryKey = isset($_POST['category']) ? (string) $_POST['category'] : '';
+$categoryConfig = $categories[$categoryKey] ?? null;
+$categoryLabel = $categoryConfig['label'] ?? '未設定';
+$listPage = $categoryConfig['listPage'] ?? 'index.php';
+$formPage = $categoryConfig ? 'post_form.php?category=' . $categoryKey : 'post_form.php';
+$targetTable = $categoryConfig['table'] ?? null;
+
 $uploadDir = __DIR__ . '/uploads/';
 if (!file_exists($uploadDir)) {
     mkdir($uploadDir, 0777, true);
@@ -18,6 +26,10 @@ $uploadedPdf = null;
 $uploadedAudio = null;
 $errors = [];
 $dbError = null;
+
+if ($categoryConfig === null) {
+    $errors[] = '投稿カテゴリが選択されていません。';
+}
 
 if (isset($_FILES['pdf']) && $_FILES['pdf']['error'] !== UPLOAD_ERR_NO_FILE) {
     if ($_FILES['pdf']['error'] === UPLOAD_ERR_OK) {
@@ -67,7 +79,11 @@ if (!empty($_POST['audioData']) && preg_match('/^data:audio\/webm;base64,/', $_P
 if (empty($errors)) {
     try {
         $pdo = getPdo();
-        $stmt = $pdo->prepare('INSERT INTO posts (title, pdf_path, audio_path) VALUES (:title, :pdf_path, :audio_path)');
+        if ($targetTable === null) {
+            throw new RuntimeException('登録先のカテゴリが見つかりません。');
+        }
+
+        $stmt = $pdo->prepare(sprintf('INSERT INTO `%s` (title, pdf_path, audio_path) VALUES (:title, :pdf_path, :audio_path)', $targetTable));
         $stmt->execute([
             ':title' => $title,
             ':pdf_path' => $storedPdfPath,
@@ -109,6 +125,7 @@ $successfullyStored = !$hasErrors && $dbError === null;
     <?php endif; ?>
 
     <p class="upload-title">投稿タイトル：<strong><?= $titleEscaped ?: '（タイトル未入力）' ?></strong></p>
+    <p class="upload-category">カテゴリ：<strong><?= htmlspecialchars($categoryLabel, ENT_QUOTES, 'UTF-8') ?></strong></p>
 
     <ul class="upload-summary">
       <li>PDF：<?= $uploadedPdf ? htmlspecialchars($uploadedPdf, ENT_QUOTES, 'UTF-8') : '未アップロード' ?></li>
@@ -116,8 +133,8 @@ $successfullyStored = !$hasErrors && $dbError === null;
     </ul>
 
     <div class="cta-section">
-      <a class="cta-button" href="form.php">一覧に戻る</a>
-      <a class="cta-button secondary" href="style.html">続けて投稿する</a>
+      <a class="cta-button" href="<?= htmlspecialchars($listPage, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($categoryLabel, ENT_QUOTES, 'UTF-8') ?>一覧に戻る</a>
+      <a class="cta-button secondary" href="<?= htmlspecialchars($formPage, ENT_QUOTES, 'UTF-8') ?>">続けて投稿する</a>
     </div>
   </main>
 </body>
