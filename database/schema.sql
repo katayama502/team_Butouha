@@ -57,6 +57,7 @@ CREATE TABLE IF NOT EXISTS `reservations` (
   `user_id` INT UNSIGNED NOT NULL,
   `reserved_for` VARCHAR(100) NOT NULL,
   `note` TEXT DEFAULT NULL,
+  `document_path` VARCHAR(255) DEFAULT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `room_datetime_unique` (`room`, `reserved_at`),

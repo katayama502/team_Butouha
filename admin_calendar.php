@@ -1,469 +1,440 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>予定の作成</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f5f5f5;
+<?php
+require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/database.php';
+
+requireAdmin();
+
+$user = getAuthenticatedUser();
+$displayName = $user['display_name'] ?? '';
+
+$validRooms = [
+    'large' => '大会議室',
+    'small' => '小会議室',
+];
+
+$timezone = new DateTimeZone('Asia/Tokyo');
+$today = new DateTimeImmutable('today', $timezone);
+
+$yearParam = filter_input(INPUT_GET, 'year', FILTER_VALIDATE_INT);
+$monthParam = filter_input(INPUT_GET, 'month', FILTER_VALIDATE_INT);
+if ($yearParam === false || $yearParam === null) {
+    $yearParam = (int) $today->format('Y');
+}
+if ($monthParam === false || $monthParam === null || $monthParam < 1 || $monthParam > 12) {
+    $monthParam = (int) $today->format('n');
+}
+
+try {
+    $monthStart = new DateTimeImmutable(sprintf('%04d-%02d-01', $yearParam, $monthParam), $timezone);
+} catch (Exception $exception) {
+    $monthStart = $today->modify('first day of this month');
+}
+
+$monthEnd = $monthStart->modify('+1 month');
+
+$selectedDateParam = filter_input(INPUT_GET, 'selected_date', FILTER_SANITIZE_STRING);
+$selectedDate = null;
+if ($selectedDateParam) {
+    $candidate = DateTimeImmutable::createFromFormat('Y-m-d', $selectedDateParam, $timezone);
+    if ($candidate instanceof DateTimeImmutable) {
+        $selectedDate = $candidate;
+    }
+}
+if (!$selectedDate) {
+    $selectedDate = $today->format('Y-m') === $monthStart->format('Y-m') ? $today : $monthStart;
+}
+
+$errors = [];
+$successMessage = null;
+
+$selectedRoomValue = isset($_POST['room']) ? (string) $_POST['room'] : 'large';
+$reservedForValue = isset($_POST['reserved_for']) ? trim((string) $_POST['reserved_for']) : $displayName;
+$noteValue = isset($_POST['note']) ? trim((string) $_POST['note']) : '';
+$reservedAtValue = isset($_POST['reserved_at']) ? (string) $_POST['reserved_at'] : $selectedDate->format('Y-m-d') . 'T09:00';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $room = $selectedRoomValue;
+    $reservedAtInput = $reservedAtValue;
+    $reservedFor = $reservedForValue;
+    $note = $noteValue;
+    $formYear = isset($_POST['current_year']) ? (int) $_POST['current_year'] : (int) $monthStart->format('Y');
+    $formMonth = isset($_POST['current_month']) ? (int) $_POST['current_month'] : (int) $monthStart->format('n');
+    $selectedDateInput = isset($_POST['selected_date']) ? (string) $_POST['selected_date'] : $selectedDate->format('Y-m-d');
+
+    if (!isset($validRooms[$room])) {
+        $errors[] = '会議室の選択が正しくありません。';
+        $selectedRoomValue = 'large';
+    } else {
+        $selectedRoomValue = $room;
     }
 
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 20px;
-      background-color: #ffffff;
-      min-height: 100vh;
-      box-sizing: border-box;
-      position: relative;
+    if ($reservedAtInput === '') {
+        $errors[] = '予約日時を入力してください。';
     }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 30px;
+    $reservedAt = null;
+    if ($reservedAtInput !== '') {
+        $reservedAt = DateTimeImmutable::createFromFormat('Y-m-d\TH:i', $reservedAtInput, $timezone);
+        if (!$reservedAt) {
+            $errors[] = '予約日時の形式が正しくありません。';
+        }
     }
 
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
+    if ($reservedAt instanceof DateTimeImmutable) {
+        if ($reservedAt < (new DateTimeImmutable('now', $timezone))->modify('-1 hour')) {
+            $errors[] = '過去の日時は予約できません。';
+        }
     }
 
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 20px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      font-size: 1em;
+    if ($reservedFor === '') {
+        $errors[] = '利用者名を入力してください。';
     }
 
-    textarea {
-      resize: vertical;
-      min-height: 100px;
+    $reservedForValue = $reservedFor;
+    $noteValue = $note;
+
+    $documentPath = null;
+    if (isset($_FILES['document']) && $_FILES['document']['error'] !== UPLOAD_ERR_NO_FILE) {
+        if ($_FILES['document']['error'] === UPLOAD_ERR_OK) {
+            $tmpName = $_FILES['document']['tmp_name'];
+            $originalName = $_FILES['document']['name'];
+            $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+            if ($extension !== 'pdf') {
+                $errors[] = 'PDFファイルのみアップロードできます。';
+            } else {
+                $uploadDir = __DIR__ . '/uploads/reservations/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+                try {
+                    $uniqueName = sprintf('reservation_%s_%s.pdf', date('YmdHis'), bin2hex(random_bytes(4)));
+                } catch (Exception $randomException) {
+                    $uniqueName = null;
+                    $errors[] = 'ファイル名の生成に失敗しました。時間をおいて再度お試しください。';
+                }
+                if ($uniqueName !== null) {
+                    $targetPath = $uploadDir . $uniqueName;
+                    if (move_uploaded_file($tmpName, $targetPath)) {
+                        $documentPath = 'uploads/reservations/' . $uniqueName;
+                    } else {
+                        $errors[] = 'PDFファイルの保存に失敗しました。';
+                    }
+                }
+            }
+        } else {
+            $errors[] = 'PDFファイルのアップロード中にエラーが発生しました。';
+        }
     }
 
-    .post-button {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      padding: 15px 25px;
-      border-radius: 50px;
-      font-size: 16px;
-      cursor: pointer;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    if (!$errors && $reservedAt instanceof DateTimeImmutable) {
+        try {
+            $pdo = getPdo();
+            $stmt = $pdo->prepare('INSERT INTO reservations (room, reserved_at, user_id, reserved_for, note, document_path) VALUES (:room, :reserved_at, :user_id, :reserved_for, :note, :document_path)');
+            $stmt->execute([
+                ':room' => $room,
+                ':reserved_at' => $reservedAt->format('Y-m-d H:i:s'),
+                ':user_id' => $user['id'],
+                ':reserved_for' => $reservedFor,
+                ':note' => $note !== '' ? $note : null,
+                ':document_path' => $documentPath,
+            ]);
+
+            $successMessage = sprintf('%sを%sに予約しました。', $validRooms[$room], $reservedAt->format('Y/m/d H:i'));
+
+            $redirectQuery = http_build_query([
+                'year' => $formYear,
+                'month' => $formMonth,
+                'selected_date' => $reservedAt->format('Y-m-d'),
+                'success' => 1,
+                'message' => $successMessage,
+            ]);
+            header('Location: admin_calendar.php?' . $redirectQuery);
+            exit;
+        } catch (PDOException $exception) {
+            if ($documentPath !== null) {
+                @unlink(__DIR__ . '/' . $documentPath);
+            }
+            if ((int) $exception->getCode() === 23000) {
+                $errors[] = '指定した日時はすでに予約されています。別の時間を選択してください。';
+            } else {
+                $errors[] = '予約の登録に失敗しました。時間をおいて再度お試しください。';
+            }
+        } catch (Throwable $exception) {
+            if ($documentPath !== null) {
+                @unlink(__DIR__ . '/' . $documentPath);
+            }
+            $errors[] = '予期しないエラーが発生しました。時間をおいて再度お試しください。';
+        }
     }
 
-    .post-button:hover {
-      background-color: #0056b3;
+    try {
+        $candidate = new DateTimeImmutable($selectedDateInput, $timezone);
+        $selectedDate = $candidate;
+    } catch (Exception $exception) {
+        // ignore
     }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>予定の作成</h1>
 
-    <form id="event-form">
-  <label for="datetime">日時</label>
-  <input type="datetime-local" id="datetime" name="datetime" required />
-
-  <label for="title">予定</label>
-  <input type="text" id="title" name="title" placeholder="例：会議、イベントなど" required />
-
-  <label for="memo">メモ</label>
-  <textarea id="memo" name="memo" placeholder="詳細やメモを記入できます" style="height: 200px;"></textarea>
-
-  
-
-  <!-- PDF添付エリア（メモ欄の下に配置） -->
-  <div style="margin-top: 20px;">
-    <label for="pdfUpload">PDFを添付</label>
-    <input type="file" id="pdfUpload" accept="application/pdf" onchange="previewPDF(event)" />
-    
-    <div id="pdfContainer" style="margin-top: 10px; display: none;">
-      <label>PDF プレビュー</label>
-      <embed id="pdfPreview" type="application/pdf" width="100%" height="200px" />
-    </div>
-  </div>
-</form>
-
-  </div>
-
-  <button class="post-button" onclick="submitEvent()">投稿</button>
-
-   
-  </div>
-
-  <script>
-    function submitEvent() {
-      const datetime = document.getElementById('datetime').value;
-      const title = document.getElementById('title').value;
-      const memo = document.getElementById('memo').value;
-
-      if (!datetime || !title) {
-        alert("日時と予定を入力してください。");
-        return;
-      }
-
-      // 仮のデータ送信処理（サーバーに送るなど）
-      console.log("投稿内容：", {
-        datetime,
-        title,
-        memo
-      });
-
-      // 投稿完了後、カレンダー画面に戻る（ここではダミーでリダイレクト）
-      alert("予定を投稿しました！");
-      window.location.href = "yotei_calendar.php"; // ← カレンダー画面のURLに書き換えてください
+    if (!empty($errors) && $documentPath !== null) {
+        @unlink(__DIR__ . '/' . $documentPath);
+        $documentPath = null;
     }
-  </script>
-</body>
-</html>
-17:14
+}
+
+if (isset($_GET['success']) && $_GET['success'] !== '') {
+    $messageParam = filter_input(INPUT_GET, 'message', FILTER_UNSAFE_RAW);
+    $successMessage = $messageParam !== null ? $messageParam : '予約を登録しました。';
+}
+
+$calendarStart = $monthStart->modify('-' . (int) $monthStart->format('w') . ' days');
+$calendarDays = [];
+for ($i = 0; $i < 42; $i++) {
+    $calendarDays[] = $calendarStart->modify('+' . $i . ' days');
+}
+
+$reservationsByDate = [];
+$reservationsForSelectedDate = [];
+try {
+    $pdo = getPdo();
+    $stmt = $pdo->prepare('SELECT id, room, reserved_at, reserved_for, note, document_path FROM reservations WHERE reserved_at >= :start AND reserved_at < :end ORDER BY reserved_at');
+    $stmt->execute([
+        ':start' => $monthStart->format('Y-m-d H:i:s'),
+        ':end' => $monthEnd->format('Y-m-d H:i:s'),
+    ]);
+    foreach ($stmt->fetchAll() as $row) {
+        $reservedAt = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $row['reserved_at'], $timezone);
+        if (!$reservedAt) {
+            continue;
+        }
+        $dateKey = $reservedAt->format('Y-m-d');
+        $reservationItem = [
+            'time' => $reservedAt->format('H:i'),
+            'room' => $row['room'],
+            'room_label' => $validRooms[$row['room']] ?? $row['room'],
+            'reserved_for' => $row['reserved_for'],
+            'note' => $row['note'] ?? '',
+            'document_path' => $row['document_path'],
+        ];
+        $reservationsByDate[$dateKey][] = $reservationItem;
+    }
+
+    $selectedKey = $selectedDate->format('Y-m-d');
+    $reservationsForSelectedDate = $reservationsByDate[$selectedKey] ?? [];
+} catch (Throwable $exception) {
+    $errors[] = 'カレンダーの情報を取得できませんでした。';
+}
+
+$prevMonth = $monthStart->modify('-1 month');
+$nextMonth = $monthStart->modify('+1 month');
+$prevSelectedDate = $selectedDate->modify('-1 month');
+$nextSelectedDate = $selectedDate->modify('+1 month');
+
+$reservedAtValue = $selectedDate->format('Y-m-d') . 'T09:00';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reserved_at'])) {
+    $reservedAtValue = (string) $_POST['reserved_at'];
+}
+
+$weekdayLabels = ['日', '月', '火', '水', '木', '金', '土'];
+$selectedDayLabel = $selectedDate->format('Y年n月j日') . '（' . $weekdayLabels[(int) $selectedDate->format('w')] . '）';
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>年度カレンダー</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    .custom-post-button {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: #3b5fffff; /* 赤色 */
-  color: #fff8f8ff; /* 黒い文字 */
-  font-size: 1.6rem;
-  font-weight: bold;
-  border: none;
-  border-radius: 12px;
-  padding: 14px 28px;
-  cursor: pointer;
-  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3);
-  z-index: 1005;
-  font-family: "Arial", "Hiragino Kaku Gothic ProN", "メイリオ", sans-serif;
-  transition: transform 0.1s ease;
-}
-
-.custom-post-button:hover {
-  transform: scale(1.05);
-}
-
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-
-    .back-button {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      z-index: 1002;
-      padding: 6px 12px;
-      font-size: 0.9rem;
-    }
-
-    .hamburger {
-      display: none;
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      font-size: 28px;
-      background: none;
-      border: none;
-      z-index: 1001;
-      cursor: pointer;
-    }
-
-    .hamburger.hidden {
-      display: none !important;
-    }
-
-    .overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.3);
-      z-index: 999;
-    }
-
-    .overlay.active {
-      display: block;
-    }
-
-    .main {
-      display: flex;
-      flex: 1;
-      width: 100%;
-    }
-
-    .sidebar {
-      width: 120px;
-      background: #f8f9fa;
-      padding: 10px;
-      box-sizing: border-box;
-      transition: transform 0.3s ease;
-    }
-
-    .sidebar button {
-      display: block;
-      width: 100%;
-      margin: 4px 0;
-      padding: 6px;
-      font-size: 0.9rem;
-      border: none;
-      background-color: #e2e6ea;
-      cursor: pointer;
-    }
-
-    .calendar {
-      flex: 1;
-      padding: 10px;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .calendar h2 {
-      margin-bottom: 10px;
-      font-size: 1.2rem;
-    }
-
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 4px;
-      width: 100%;
-      max-width: 700px;
-    }
-
-    .day {
-      text-align: center;
-    }
-
-    .day button {
-      font-size: 1rem;
-      padding: 12px;
-      width: 100%;
-    }
-
-    .schedule {
-      margin-top: 20px;
-      padding: 10px;
-      border-top: 1px solid #ccc;
-      background: #f8f9fa;
-      width: 100%;
-      font-size: 0.95rem;
-    }
-
-    @media (max-width: 768px) {
-      .hamburger {
-        display: block;
-      }
-
-      .main {
-        flex-direction: column;
-      }
-
-      .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100%;
-        transform: translateX(-100%);
-        z-index: 1000;
-        box-shadow: 2px 0 5px rgba(0,0,0,0.2);
-      }
-
-      .sidebar.open {
-        transform: translateX(0);
-      }
-
-      .calendar {
-        padding-top: 60px;
-      }
-    }
-
-  </style>
+  <title>会議室カレンダー | 高橋建設</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <a href="me.html" class="back-button btn btn-outline-dark">もどる</a>
-  <button class="hamburger" id="hamburgerBtn" onclick="toggleMenu()">☰</button>
-  <div class="overlay" id="overlay" onclick="closeMenu()"></div>
-
-  <div class="main">
-    <div class="sidebar" id="monthButtons"></div>
-    <div class="calendar">
-      <h2 id="calendarTitle">カレンダー</h2>
-      <div class="calendar-grid" id="calendarGrid"></div>
-      <div class="schedule" id="scheduleDisplay">📅 日付をクリックすると予定が表示されます。</div>
+<body class="page-admin-calendar">
+  <header class="admin-calendar-header">
+    <div class="admin-calendar-header__inner">
+      <a class="back-link" href="index.php">&larr; 管理トップに戻る</a>
+      <div class="admin-calendar-header__titles">
+        <h1 class="admin-calendar-title">会議室カレンダー</h1>
+        <p class="admin-calendar-subtitle">カレンダーから日付を選んで、PDF資料付きで予約を登録できます。</p>
+      </div>
+      <div class="user-menu">
+        <span class="user-menu__label">ようこそ、<?= htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8') ?>さん（管理者）</span>
+        <a class="user-menu__link" href="logout.php">ログアウト</a>
+      </div>
     </div>
-  </div>
+  </header>
+
+  <main class="admin-calendar-main">
+    <?php if ($successMessage): ?>
+      <div class="admin-calendar-alert admin-calendar-alert--success" role="status"><?= htmlspecialchars($successMessage, ENT_QUOTES, 'UTF-8') ?></div>
+    <?php endif; ?>
+    <?php if ($errors): ?>
+      <div class="admin-calendar-alert admin-calendar-alert--error" role="alert">
+        <ul>
+          <?php foreach ($errors as $error): ?>
+            <li><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></li>
+          <?php endforeach; ?>
+        </ul>
+      </div>
+    <?php endif; ?>
+
+    <div class="admin-calendar-layout">
+      <section class="admin-calendar-panel" aria-labelledby="calendarHeading">
+        <div class="admin-calendar-month-bar">
+          <a class="admin-calendar-month-bar__link" href="admin_calendar.php?year=<?= $prevMonth->format('Y') ?>&amp;month=<?= $prevMonth->format('n') ?>&amp;selected_date=<?= htmlspecialchars($prevSelectedDate->format('Y-m-d'), ENT_QUOTES, 'UTF-8') ?>" aria-label="前の月へ">&larr;</a>
+          <h2 id="calendarHeading" class="admin-calendar-month-bar__title"><?= $monthStart->format('Y年n月') ?></h2>
+          <a class="admin-calendar-month-bar__link" href="admin_calendar.php?year=<?= $nextMonth->format('Y') ?>&amp;month=<?= $nextMonth->format('n') ?>&amp;selected_date=<?= htmlspecialchars($nextSelectedDate->format('Y-m-d'), ENT_QUOTES, 'UTF-8') ?>" aria-label="次の月へ">&rarr;</a>
+        </div>
+        <div class="admin-calendar-grid" role="grid">
+          <?php foreach (['日','月','火','水','木','金','土'] as $weekday): ?>
+            <div class="admin-calendar-grid__header" role="columnheader"><?= $weekday ?></div>
+          <?php endforeach; ?>
+          <?php foreach ($calendarDays as $day): ?>
+            <?php
+              $isCurrentMonth = $day->format('Y-m') === $monthStart->format('Y-m');
+              $dateKey = $day->format('Y-m-d');
+              $hasReservations = !empty($reservationsByDate[$dateKey]);
+              $isSelected = $selectedDate->format('Y-m-d') === $dateKey;
+              $weekdayLabel = $weekdayLabels[(int) $day->format('w')];
+              $ariaLabel = $day->format('n月j日') . '（' . $weekdayLabel . '）の予定を確認';
+            ?>
+            <button
+              type="button"
+              class="admin-calendar-grid__cell<?= $isCurrentMonth ? '' : ' is-outside' ?><?= $hasReservations ? ' has-reservation' : '' ?><?= $isSelected ? ' is-selected' : '' ?>"
+              data-date="<?= htmlspecialchars($dateKey, ENT_QUOTES, 'UTF-8') ?>"
+              aria-pressed="<?= $isSelected ? 'true' : 'false' ?>"
+              aria-label="<?= htmlspecialchars($ariaLabel, ENT_QUOTES, 'UTF-8') ?>"
+            >
+              <span class="admin-calendar-grid__date"><?= (int) $day->format('j') ?></span>
+              <?php if ($hasReservations): ?>
+                <span class="admin-calendar-grid__badge">予約<?= count($reservationsByDate[$dateKey]) ?>件</span>
+              <?php endif; ?>
+            </button>
+          <?php endforeach; ?>
+        </div>
+      </section>
+
+      <aside class="admin-calendar-side">
+        <section class="admin-calendar-details" aria-labelledby="dayDetailHeading">
+          <h2 id="dayDetailHeading" class="admin-calendar-details__title"><?= htmlspecialchars($selectedDayLabel, ENT_QUOTES, 'UTF-8') ?>の予定</h2>
+          <?php if ($reservationsForSelectedDate): ?>
+            <ul class="admin-calendar-reservations">
+              <?php foreach ($reservationsForSelectedDate as $reservation): ?>
+                <li class="admin-calendar-reservations__item">
+                  <div class="admin-calendar-reservations__time"><?= htmlspecialchars($reservation['time'], ENT_QUOTES, 'UTF-8') ?></div>
+                  <div class="admin-calendar-reservations__body">
+                    <div class="admin-calendar-reservations__room"><?= htmlspecialchars($reservation['room_label'], ENT_QUOTES, 'UTF-8') ?></div>
+                    <div class="admin-calendar-reservations__meta">利用者：<?= htmlspecialchars($reservation['reserved_for'], ENT_QUOTES, 'UTF-8') ?></div>
+                    <?php if ($reservation['note'] !== ''): ?>
+                      <div class="admin-calendar-reservations__note">備考：<?= nl2br(htmlspecialchars($reservation['note'], ENT_QUOTES, 'UTF-8')) ?></div>
+                    <?php endif; ?>
+                    <?php if (!empty($reservation['document_path'])): ?>
+                      <a class="admin-calendar-reservations__attachment" href="<?= htmlspecialchars($reservation['document_path'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">📄 添付PDF</a>
+                    <?php endif; ?>
+                  </div>
+                </li>
+              <?php endforeach; ?>
+            </ul>
+          <?php else: ?>
+            <p class="admin-calendar-details__empty">予定はまだ登録されていません。</p>
+          <?php endif; ?>
+        </section>
+
+        <section class="admin-calendar-form" id="reservationFormSection" aria-labelledby="reservationFormHeading">
+          <h2 id="reservationFormHeading" class="admin-calendar-form__title">予約を登録</h2>
+          <form method="post" enctype="multipart/form-data" class="admin-calendar-form__form" novalidate>
+            <input type="hidden" name="current_year" value="<?= (int) $monthStart->format('Y') ?>">
+            <input type="hidden" name="current_month" value="<?= (int) $monthStart->format('n') ?>">
+            <input type="hidden" id="selectedDateInput" name="selected_date" value="<?= htmlspecialchars($selectedDate->format('Y-m-d'), ENT_QUOTES, 'UTF-8') ?>">
+
+            <label class="admin-calendar-form__field">
+              <span class="admin-calendar-form__label">会議室</span>
+              <select name="room" id="room" required>
+                <?php foreach ($validRooms as $value => $label): ?>
+                  <option value="<?= htmlspecialchars($value, ENT_QUOTES, 'UTF-8') ?>" <?= $selectedRoomValue === $value ? 'selected' : '' ?>><?= htmlspecialchars($label, ENT_QUOTES, 'UTF-8') ?></option>
+                <?php endforeach; ?>
+              </select>
+            </label>
+
+            <label class="admin-calendar-form__field">
+              <span class="admin-calendar-form__label">日時</span>
+              <input type="datetime-local" id="reservedAtField" name="reserved_at" value="<?= htmlspecialchars($reservedAtValue, ENT_QUOTES, 'UTF-8') ?>" required>
+            </label>
+
+            <label class="admin-calendar-form__field">
+              <span class="admin-calendar-form__label">利用者名</span>
+              <input type="text" name="reserved_for" value="<?= htmlspecialchars($reservedForValue, ENT_QUOTES, 'UTF-8') ?>" required>
+            </label>
+
+            <label class="admin-calendar-form__field">
+              <span class="admin-calendar-form__label">備考</span>
+              <textarea name="note" rows="3" placeholder="共有事項や会議の目的などを入力してください。"><?= htmlspecialchars($noteValue, ENT_QUOTES, 'UTF-8') ?></textarea>
+            </label>
+
+            <label class="admin-calendar-form__field">
+              <span class="admin-calendar-form__label">添付PDF</span>
+              <input type="file" name="document" id="documentUpload" accept="application/pdf">
+              <small class="admin-calendar-form__hint">議事次第などの資料をアップロードできます。</small>
+            </label>
+
+            <div id="pdfPreviewContainer" class="admin-calendar-pdf" hidden>
+              <p class="admin-calendar-pdf__title">PDFプレビュー</p>
+              <embed id="pdfPreview" type="application/pdf" width="100%" height="220">
+            </div>
+
+            <div class="admin-calendar-form__actions">
+              <button type="submit" class="reservation-button">予約を登録する</button>
+            </div>
+          </form>
+        </section>
+      </aside>
+    </div>
+  </main>
 
   <script>
-    const monthNames = ["4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月", "1月", "2月", "3月"];
-    const monthNumbers = [3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 1, 2];
+    (function() {
+      const dayButtons = document.querySelectorAll('.admin-calendar-grid__cell');
+      const selectedDateInput = document.getElementById('selectedDateInput');
+      const reservedAtField = document.getElementById('reservedAtField');
+      const pdfUpload = document.getElementById('documentUpload');
+      const pdfContainer = document.getElementById('pdfPreviewContainer');
+      const pdfPreview = document.getElementById('pdfPreview');
 
-    const holidays = {
-      "2025-01-01": "元日",
-      "2025-01-13": "成人の日",
-      "2025-02-11": "建国記念の日",
-      "2025-03-20": "春分の日",
-      "2025-04-29": "昭和の日",
-      "2025-05-03": "憲法記念日",
-      "2025-05-04": "みどりの日",
-      "2025-05-05": "こどもの日",
-      "2025-07-21": "海の日",
-      "2025-08-11": "山の日",
-      "2025-09-15": "敬老の日",
-      "2025-09-23": "秋分の日",
-      "2025-10-13": "スポーツの日",
-      "2025-11-03": "文化の日",
-      "2025-11-23": "勤労感謝の日",
-      "2025-12-23": "天皇誕生日"
-    };
-
-    const schedules = {
-      "2025-04-29": "昭和の日：記念式典",
-      "2025-05-03": "憲法記念日：講演会",
-      "2025-05-05": "こどもの日：イベント開催",
-      "2025-07-21": "海の日：海岸清掃ボランティア",
-      "2025-09-15": "敬老の日：地域交流会"
-    };
-
-    const monthButtons = document.getElementById("monthButtons");
-    const calendarTitle = document.getElementById("calendarTitle");
-    const calendarGrid = document.getElementById("calendarGrid");
-    const hamburgerBtn = document.getElementById("hamburgerBtn");
-    const overlay = document.getElementById("overlay");
-    const scheduleDisplay = document.getElementById("scheduleDisplay");
-
-    monthNames.forEach((name, i) => {
-      const btn = document.createElement("button");
-      btn.textContent = name;
-      btn.className = "btn btn-light";
-      btn.onclick = () => {
-        renderCalendar(monthNumbers[i]);
-        closeMenu();
-      };
-      monthButtons.appendChild(btn);
-    });
-
-    function renderCalendar(month) {
-      const year = (month >= 3) ? new Date().getFullYear() : new Date().getFullYear() + 1;
-      const firstDay = new Date(year, month, 1);
-      const lastDay = new Date(year, month + 1, 0);
-      const startDay = firstDay.getDay();
-      const totalDays = lastDay.getDate();
-
-      calendarTitle.textContent = `${year}年 ${monthNames[monthNumbers.indexOf(month)]}`;
-      calendarGrid.innerHTML = "";
-
-      ["日", "月", "火", "水", "木", "金", "土"].forEach(day => {
-        const header = document.createElement("div");
-        header.className = "day fw-bold";
-        header.textContent = day;
-        calendarGrid.appendChild(header);
+      dayButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const date = button.getAttribute('data-date');
+          if (!date) {
+            return;
+          }
+          dayButtons.forEach((btn) => btn.classList.remove('is-selected'));
+          button.classList.add('is-selected');
+          if (selectedDateInput) {
+            selectedDateInput.value = date;
+          }
+          if (reservedAtField) {
+            const current = reservedAtField.value;
+            const time = current && current.includes('T') ? current.split('T')[1] : '09:00';
+            reservedAtField.value = `${date}T${time}`;
+          }
+          const params = new URLSearchParams(window.location.search);
+          params.set('year', date.substring(0, 4));
+          params.set('month', String(parseInt(date.substring(5, 7), 10)));
+          params.set('selected_date', date);
+          params.delete('success');
+          const newUrl = `${window.location.pathname}?${params.toString()}`;
+          window.location.assign(newUrl + '#calendarHeading');
+        });
       });
 
-      for (let i = 0; i < startDay; i++) {
-        calendarGrid.appendChild(document.createElement("div"));
-      }
-
-      for (let d = 1; d <= totalDays; d++) {
-        const cellDate = new Date(year, month, d);
-        const dayOfWeek = cellDate.getDay();
-        const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-        const isHoliday = holidays.hasOwnProperty(dateKey);
-
-        const cell = document.createElement("div");
-        cell.className = "day";
-
-        const btn = document.createElement("button");
-        btn.textContent = d;
-        btn.className = "btn w-100";
-
-        // 色分けロジック（曜日優先、祝日は平日のみ赤）
-        if (dayOfWeek === 0) {
-          btn.classList.add("btn-outline-danger"); // 日曜（赤）
-        } else if (dayOfWeek === 6) {
-          btn.classList.add("btn-outline-primary"); // 土曜（青）
-        } else if (isHoliday) {
-          btn.classList.add("btn-outline-danger"); // 平日の祝日（赤）
-        } else {
-          btn.classList.add("btn-outline-secondary"); // 平日（グレー）
-        }
-
-        if (isHoliday) {
-          btn.title = holidays[dateKey]; // ツールチップに祝日名
-        }
-
-        btn.onclick = () => {
-          const scheduleText = schedules[dateKey] || "予定は登録されていません。";
-          scheduleDisplay.textContent = `📅 ${year}年${month + 1}月${d}日 の予定：${scheduleText}`;
-        };
-
-        cell.appendChild(btn);
-        calendarGrid.appendChild(cell);
-      }
-
-      // 今日の日付を自動選択（初期表示時）
-      const today = new Date();
-      const todayYear = today.getFullYear();
-      const todayMonth = today.getMonth();
-      const todayDate = today.getDate();
-      const calendarYear = (todayMonth >= 3) ? todayYear : todayYear + 1;
-      const calendarMonth = (todayMonth >= 3) ? todayMonth : todayMonth;
-
-      if (month === calendarMonth) {
-        const buttons = document.querySelectorAll(".calendar-grid .day button");
-        buttons.forEach(btn => {
-          if (btn.textContent === String(todayDate)) {
-            btn.click();
+      if (pdfUpload && pdfContainer && pdfPreview) {
+        pdfUpload.addEventListener('change', (event) => {
+          const file = event.target.files && event.target.files[0];
+          if (!file || file.type !== 'application/pdf') {
+            pdfContainer.hidden = true;
+            pdfPreview.removeAttribute('src');
+            return;
           }
+          const fileURL = URL.createObjectURL(file);
+          pdfPreview.src = fileURL;
+          pdfContainer.hidden = false;
         });
       }
-    }
-
-    function toggleMenu() {
-      monthButtons.classList.add("open");
-      overlay.classList.add("active");
-      hamburgerBtn.classList.add("hidden");
-    }
-
-    function closeMenu() {
-      monthButtons.classList.remove("open");
-      overlay.classList.remove("active");
-      hamburgerBtn.classList.remove("hidden");
-    }
-
-    // 初期表示：今月のカレンダーを表示
-    const now = new Date();
-    const currentMonth = now.getMonth(); // 0〜11
-    const displayMonth = currentMonth;
-    renderCalendar(displayMonth);
-
-    function goToCreate() {
-  window.location.href = "calendar_sakusei.html";
-}
-
+    })();
   </script>
-  <button class="custom-post-button" onclick="goToCreate()">＋投稿</button>
-
 </body>
 </html>
