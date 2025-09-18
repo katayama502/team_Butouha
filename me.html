@@ -2,128 +2,1020 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>高橋建設 ホーム</title>
+  <title>高橋建設 ユーザーポータル</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: 'Arial', sans-serif;
-      background-color: #f4f4f4;
+      font-family: "Noto Sans JP", "Hiragino Kaku Gothic Pro", "Meiryo", sans-serif;
+      background: #f5f7fa;
+      color: #1f2933;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
     }
 
     header {
-      background-color: #2c3e50;
-      color: white;
+      background: linear-gradient(135deg, #1f3a93, #2c82c9);
+      color: #fff;
+      padding: 32px 16px 40px;
       text-align: center;
-      width: 100%;
-      padding: 30px;
-      font-size: 36px;
-      font-weight: bold;
+      box-shadow: 0 4px 16px rgba(17, 24, 39, 0.2);
     }
 
-    .main {
-      flex: 1;
+    header h1 {
+      margin: 0;
+      font-size: clamp(2rem, 2.4vw + 1.2rem, 2.75rem);
+      letter-spacing: 0.08em;
+    }
+
+    header p {
+      margin: 12px auto 0;
+      max-width: 680px;
+      font-size: 1rem;
+      line-height: 1.6;
+      opacity: 0.9;
+    }
+
+    .content {
+      width: min(1100px, 92vw);
+      margin: -40px auto 48px;
       display: flex;
       flex-direction: column;
+      gap: 32px;
+    }
+
+    section {
+      background: #fff;
+      border-radius: 20px;
+      padding: clamp(20px, 2.4vw + 12px, 32px);
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    .section-title {
+      margin: 0 0 18px;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #102a43;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title .icon {
+      font-size: 1.35rem;
+    }
+
+    /* Notice cards */
+    .notice-lists {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+
+    .notice-card h3 {
+      margin: 0 0 12px;
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #1f2937;
+    }
+
+    .notice-card h3 span {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #4f46e5;
+      background: rgba(79, 70, 229, 0.1);
+      border-radius: 999px;
+      padding: 4px 10px;
+      letter-spacing: 0.05em;
+    }
+
+    .notice-list {
+      list-style: none;
+      margin: 0 0 12px;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .notice-list li {
+      display: grid;
+      gap: 8px;
+      background: #f8fafc;
+      border-radius: 14px;
+      padding: 12px 14px;
+      border: 1px solid transparent;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .notice-list li:hover {
+      background: #fff;
+      border-color: rgba(79, 70, 229, 0.2);
+    }
+
+    .notice-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #1f2933;
+    }
+
+    .notice-title a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .notice-title a:hover,
+    .notice-title a:focus {
+      text-decoration: underline;
+    }
+
+    .notice-meta {
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+
+    .notice-empty {
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+
+    .notice-card .more-link {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #1f3a93;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .notice-card .more-link::after {
+      content: '\203A';
+      font-size: 1rem;
+    }
+
+    /* Calendar section */
+    .calendar-header {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .room-switch {
+      display: inline-flex;
+      gap: 12px;
+      background: #eef2ff;
+      padding: 6px;
+      border-radius: 999px;
+      align-self: flex-start;
+    }
+
+    .room-switch button {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 18px;
+      background: transparent;
+      color: #312e81;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    }
+
+    .room-switch button.active {
+      background: #4338ca;
+      color: #fff;
+      box-shadow: 0 6px 16px rgba(67, 56, 202, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .calendar-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .week-nav {
+      display: inline-flex;
+      gap: 8px;
+    }
+
+    .week-nav button {
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid #cbd5f5;
+      background: #fff;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s ease;
+    }
+
+    .week-nav button:hover {
+      background: #f1f5f9;
+    }
+
+    .week-range {
+      font-weight: 700;
+      color: #1f2937;
+      font-size: 1rem;
+    }
+
+    .legend {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-top: 6px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend .chip {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      border: 1px solid #cbd5f5;
+    }
+
+    .legend .chip.free {
+      background: #fff;
+    }
+
+    .legend .chip.busy {
+      background: #dbeafe;
+      border-color: #60a5fa;
+    }
+
+    .calendar-grid {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: 80px repeat(7, 1fr);
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .col-header {
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 12px 4px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.92rem;
+      color: #1f2937;
+    }
+
+    .time-col {
+      background: #f8fafc;
+      border-right: 1px solid #e2e8f0;
+    }
+
+    .time-cell {
+      border-bottom: 1px solid #e2e8f0;
+      padding: 10px 6px;
+      font-size: 0.8rem;
+      color: #475569;
+      height: 48px;
+      display: flex;
       align-items: center;
       justify-content: center;
-      gap: 40px;
-      width: 100%;
-      padding: 20px;
     }
 
-    .button-group {
+    .slot-cell {
+      border-left: 1px solid #e2e8f0;
+      border-bottom: 1px solid #e2e8f0;
+      height: 48px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .slot-cell:hover {
+      background: #f8fafc;
+    }
+
+    .slot-cell.reserved {
+      background: #dbeafe;
+    }
+
+    .slot-content {
+      position: absolute;
+      inset: 4px;
+      border-radius: 10px;
+      border: 1px dashed transparent;
+      padding: 8px;
+      font-size: 0.78rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .slot-cell.reserved .slot-content {
+      border-color: #60a5fa;
+    }
+
+    .slot-name {
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+      text-align: left;
+    }
+
+    .slot-mark {
+      font-weight: 700;
+      font-size: 0.95rem;
+      width: 1.5em;
+      text-align: center;
+    }
+
+    .slot-mark.ok {
+      color: #16a34a;
+    }
+
+    .slot-mark.ng {
+      color: #dc2626;
+    }
+
+    .slot-note {
+      color: #64748b;
+      font-size: 0.72rem;
+      max-width: 150px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    .reservation-summary {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid #e2e8f0;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 20px;
+      gap: 12px;
     }
 
-    .action-button {
-      padding: 20px 40px;
-      font-size: 24px;
+    .reservation-summary h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #0f172a;
+    }
+
+    .reservation-items {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .reservation-items li {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 12px 16px;
+      border: 1px solid #e2e8f0;
+      display: grid;
+      gap: 4px;
+    }
+
+    .reservation-items li strong {
+      font-size: 0.95rem;
+      color: #1f2937;
+    }
+
+    .reservation-time {
+      font-size: 0.85rem;
+      color: #475569;
+      font-weight: 600;
+    }
+
+    .reservation-note {
+      font-size: 0.8rem;
+      color: #6b7280;
+    }
+
+    .reservation-empty {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #94a3b8;
+    }
+
+    dialog[open] {
+      border: none;
+      border-radius: 16px;
+      padding: 0;
+      width: min(420px, 92vw);
+      box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+      animation: fadeIn 0.2s ease;
+    }
+
+    dialog::backdrop {
+      background: rgba(15, 23, 42, 0.35);
+    }
+
+    .modal {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal h3 {
+      margin: 0 0 6px;
+      font-size: 1.1rem;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.8rem;
+      color: #475569;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .field input,
+    .field textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #cbd5f5;
+      font-family: inherit;
+      font-size: 0.95rem;
+      resize: vertical;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+
+    .btn {
       border: none;
       border-radius: 10px;
+      padding: 9px 16px;
+      font-weight: 600;
       cursor: pointer;
-      width: 80%;
-      max-width: 400px;
-      color: white;
-      white-space: nowrap;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-      transition: opacity 0.2s;
+      font-size: 0.95rem;
     }
 
-    .action-button:hover {
-      opacity: 0.85;
+    .btn.primary {
+      background: #2563eb;
+      color: #fff;
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
     }
 
-    .btn-reserve {
-      background-color: #e74c3c;
+    .btn.danger {
+      background: #dc2626;
+      color: #fff;
     }
 
-    .btn-calendar {
-      background-color: #27ae60;
+    .btn.secondary {
+      background: #e2e8f0;
+      color: #1f2937;
     }
 
-    .btn-important {
-      background-color: #c0392b;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    .btn-other {
-      background-color: #2980b9;
-    }
-
-    .label {
-      font-size: 28px;
-      font-weight: bold;
-      margin-bottom: 10px;
-      color: #2c3e50;
-      white-space: nowrap;
-    }
-
-    @media (max-width: 600px) {
-      header {
-        font-size: 32px;
-        padding: 25px;
+    @media (max-width: 720px) {
+      .calendar-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
       }
 
-      .action-button {
-        font-size: 22px;
-        width: 90%;
+      .week-range {
+        font-size: 0.95rem;
       }
 
-      .label {
-        font-size: 26px;
+      .legend {
+        flex-wrap: wrap;
+      }
+
+      .calendar-grid {
+        font-size: 0.85rem;
       }
     }
   </style>
 </head>
 <body>
-
 <header>
-  高橋建設
+  <h1>高橋建設 お客様向けポータル</h1>
+  <p>会議室の予約や最新のお知らせをこちらのページからご確認いただけます。ご希望の日時を選択して、簡単に予約をお申し込みください。</p>
 </header>
 
-<div class="main">
-  <div class="button-group">
-    <a class="action-button btn-reserve" href="reserve.php">予約ページへ</a>
-    <a class="action-button btn-calendar" href="yotei.php">予定（年間カレンダー）を見る</a>
-  </div>
+<main class="content">
+  <section class="notice-section">
+    <h2 class="section-title"><span class="icon">📢</span>最新のお知らせ</h2>
+    <div class="notice-lists">
+      <article class="notice-card" data-category="important">
+        <h3>重要<span>Important</span></h3>
+        <ul class="notice-list" id="notice-important">
+          <li class="notice-empty">読み込み中です...</li>
+        </ul>
+        <a class="more-link" href="form.php">一覧を開く</a>
+      </article>
+      <article class="notice-card" data-category="contribution">
+        <h3>地域貢献<span>Community</span></h3>
+        <ul class="notice-list" id="notice-contribution">
+          <li class="notice-empty">読み込み中です...</li>
+        </ul>
+        <a class="more-link" href="boranthia.php">一覧を開く</a>
+      </article>
+      <article class="notice-card" data-category="other">
+        <h3>その他<span>General</span></h3>
+        <ul class="notice-list" id="notice-other">
+          <li class="notice-empty">読み込み中です...</li>
+        </ul>
+        <a class="more-link" href="sonota.php">一覧を開く</a>
+      </article>
+    </div>
+  </section>
 
-  <div class="button-group">
-    <div class="label">＜お知らせ＞</div>
-    <a class="action-button btn-important" href="#" onclick="alert('重要なお知らせは現在準備中です'); return false;">重要</a>
-    <a class="action-button btn-other" href="#" onclick="alert('その他のお知らせは現在準備中です'); return false;">その他</a>
-  </div>
-</div>
+  <section class="calendar-section">
+    <h2 class="section-title"><span class="icon">📅</span>会議室予約カレンダー</h2>
+    <div class="calendar-header">
+      <div class="room-switch" role="tablist" aria-label="会議室の選択">
+        <button type="button" class="active" data-room="large" aria-selected="true">大会議室</button>
+        <button type="button" data-room="small" aria-selected="false">小会議室</button>
+      </div>
+      <div class="calendar-toolbar">
+        <div class="week-nav" aria-label="週の移動">
+          <button type="button" data-action="prev">◀ 前の週</button>
+          <button type="button" data-action="today">今週</button>
+          <button type="button" data-action="next">次の週 ▶</button>
+        </div>
+        <div class="week-range" id="weekRange">-</div>
+      </div>
+      <div class="legend">
+        <span><span class="chip free"></span>予約可能</span>
+        <span><span class="chip busy"></span>予約済み</span>
+      </div>
+    </div>
 
+    <div class="calendar-grid" id="calendar" aria-live="polite"></div>
+
+    <div class="reservation-summary" aria-live="polite">
+      <h2 id="reservationHeading">大会議室の今週の予約</h2>
+      <p class="reservation-empty" id="reservationEmpty">今週の予約はありません。</p>
+      <ul class="reservation-items" id="reservationItems" hidden></ul>
+    </div>
+  </section>
+</main>
+
+<dialog id="reserveDialog">
+  <form method="dialog" class="modal" id="reserveForm">
+    <h3>予約の作成</h3>
+    <div class="field">
+      <label for="f_datetime">日時</label>
+      <input type="text" id="f_datetime" readonly>
+    </div>
+    <div class="field">
+      <label for="f_name">お名前（必須）</label>
+      <input type="text" id="f_name" required>
+    </div>
+    <div class="field">
+      <label for="f_note">メモ</label>
+      <textarea id="f_note" rows="3" placeholder="必要に応じてご記入ください"></textarea>
+    </div>
+    <div class="actions">
+      <button class="btn secondary" value="cancel">閉じる</button>
+      <button class="btn primary" id="saveBtn" value="default">保存</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="detailDialog">
+  <form method="dialog" class="modal">
+    <h3>予約の詳細</h3>
+    <div class="field">
+      <label for="d_datetime">日時</label>
+      <input type="text" id="d_datetime" readonly>
+    </div>
+    <div class="field">
+      <label for="d_name">お名前</label>
+      <input type="text" id="d_name" readonly>
+    </div>
+    <div class="field">
+      <label for="d_note">メモ</label>
+      <textarea id="d_note" rows="3" readonly></textarea>
+    </div>
+    <div class="actions">
+      <button class="btn secondary" value="cancel">閉じる</button>
+      <button class="btn danger" id="deleteBtn" value="default">予約を取消</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const API_ENDPOINT = 'calendar_page.php';
+    const HOURS_START = 8;
+    const HOURS_END = 21;
+    const ROOM_LABELS = { large: '大会議室', small: '小会議室' };
+
+    const calendar = document.getElementById('calendar');
+    const weekRange = document.getElementById('weekRange');
+    const roomButtons = document.querySelectorAll('.room-switch button');
+    const reservationHeading = document.getElementById('reservationHeading');
+    const reservationItems = document.getElementById('reservationItems');
+    const reservationEmpty = document.getElementById('reservationEmpty');
+
+    const reserveDialog = document.getElementById('reserveDialog');
+    const detailDialog = document.getElementById('detailDialog');
+    const saveBtn = document.getElementById('saveBtn');
+    const deleteBtn = document.getElementById('deleteBtn');
+
+    const state = {
+      room: 'large',
+      weekStart: getMonday(new Date())
+    };
+
+    function getMonday(date) {
+      const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const day = d.getDay();
+      const diff = (day === 0 ? -6 : 1) - day; // 0:Sunday -> -6
+      d.setDate(d.getDate() + diff);
+      return d;
+    }
+
+    function formatDate(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function formatWeekday(date) {
+      const formatter = new Intl.DateTimeFormat('ja-JP', { month: 'numeric', day: 'numeric', weekday: 'short' });
+      return formatter.format(date);
+    }
+
+    function formatRangeLabel(startDate) {
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + 6);
+      const formatter = new Intl.DateTimeFormat('ja-JP', { year: 'numeric', month: 'numeric', day: 'numeric', weekday: 'short' });
+      return `${formatter.format(startDate)} 〜 ${formatter.format(endDate)}`;
+    }
+
+    function formatReservationTime(iso) {
+      const date = new Date(iso.replace(' ', 'T'));
+      if (Number.isNaN(date.getTime())) {
+        return iso;
+      }
+      const formatter = new Intl.DateTimeFormat('ja-JP', { month: 'numeric', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit' });
+      return formatter.format(date);
+    }
+
+    function updateWeekRange() {
+      weekRange.textContent = formatRangeLabel(state.weekStart);
+    }
+
+    function updateHeading() {
+      reservationHeading.textContent = `${ROOM_LABELS[state.room]}の今週の予約`;
+    }
+
+    function renderCalendarGrid() {
+      calendar.innerHTML = '';
+      const headerBlank = document.createElement('div');
+      headerBlank.className = 'col-header';
+      calendar.appendChild(headerBlank);
+
+      for (let i = 0; i < 7; i += 1) {
+        const day = new Date(state.weekStart);
+        day.setDate(day.getDate() + i);
+        const header = document.createElement('div');
+        header.className = 'col-header';
+        header.textContent = formatWeekday(day);
+        calendar.appendChild(header);
+      }
+
+      for (let hour = HOURS_START; hour < HOURS_END; hour += 1) {
+        const timeCol = document.createElement('div');
+        timeCol.className = 'time-col';
+        const timeCell = document.createElement('div');
+        timeCell.className = 'time-cell';
+        timeCell.textContent = `${String(hour).padStart(2, '0')}:00`;
+        timeCol.appendChild(timeCell);
+        calendar.appendChild(timeCol);
+
+        for (let i = 0; i < 7; i += 1) {
+          const day = new Date(state.weekStart);
+          day.setDate(day.getDate() + i);
+          const iso = `${formatDate(day)} ${String(hour).padStart(2, '0')}:00:00`;
+
+          const cell = document.createElement('div');
+          cell.className = 'slot-cell';
+          cell.dataset.datetime = iso;
+
+          const content = document.createElement('div');
+          content.className = 'slot-content';
+
+          const mark = document.createElement('span');
+          mark.className = 'slot-mark ok';
+          mark.textContent = '〇';
+
+          const name = document.createElement('span');
+          name.className = 'slot-name';
+
+          const note = document.createElement('span');
+          note.className = 'slot-note';
+
+          content.append(mark, name, note);
+          cell.appendChild(content);
+          calendar.appendChild(cell);
+        }
+      }
+    }
+
+    async function api(action, payload = {}) {
+      const params = new URLSearchParams({ action, room: state.room, ...payload });
+      const response = await fetch(API_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+        body: params.toString(),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.message || '操作に失敗しました。');
+      }
+      return data;
+    }
+
+    async function loadReservations() {
+      const start = `${formatDate(state.weekStart)} 00:00:00`;
+      const endDate = new Date(state.weekStart);
+      endDate.setDate(endDate.getDate() + 7);
+      const end = `${formatDate(endDate)} 00:00:00`;
+
+      const data = await api('list', { start, end });
+      const map = new Map();
+      data.reservations.forEach((reservation) => {
+        map.set(reservation.datetime, reservation);
+      });
+
+      calendar.querySelectorAll('.slot-cell').forEach((cell) => {
+        const dt = cell.dataset.datetime;
+        const mark = cell.querySelector('.slot-mark');
+        const name = cell.querySelector('.slot-name');
+        const note = cell.querySelector('.slot-note');
+        const reservation = map.get(dt);
+
+        if (reservation) {
+          cell.classList.add('reserved');
+          mark.textContent = '×';
+          mark.className = 'slot-mark ng';
+          name.textContent = reservation.name;
+          note.textContent = reservation.note || '';
+          cell.dataset.reservationId = reservation.id;
+          cell.dataset.name = reservation.name;
+          cell.dataset.note = reservation.note || '';
+        } else {
+          cell.classList.remove('reserved');
+          mark.textContent = '〇';
+          mark.className = 'slot-mark ok';
+          name.textContent = '';
+          note.textContent = '';
+          delete cell.dataset.reservationId;
+          delete cell.dataset.name;
+          delete cell.dataset.note;
+        }
+      });
+
+      updateReservationList(data.reservations);
+    }
+
+    function updateReservationList(reservations) {
+      reservationItems.innerHTML = '';
+      const sorted = [...reservations].sort((a, b) => a.datetime.localeCompare(b.datetime));
+
+      if (sorted.length === 0) {
+        reservationEmpty.hidden = false;
+        reservationItems.hidden = true;
+        return;
+      }
+
+      reservationEmpty.hidden = true;
+      reservationItems.hidden = false;
+
+      sorted.forEach((reservation) => {
+        const item = document.createElement('li');
+        const time = document.createElement('span');
+        time.className = 'reservation-time';
+        time.textContent = formatReservationTime(reservation.datetime);
+
+        const name = document.createElement('strong');
+        name.textContent = reservation.name || '未入力';
+
+        item.append(time, name);
+
+        if (reservation.note) {
+          const note = document.createElement('span');
+          note.className = 'reservation-note';
+          note.textContent = reservation.note;
+          item.appendChild(note);
+        }
+
+        reservationItems.appendChild(item);
+      });
+    }
+
+    function setActiveRoom(room) {
+      state.room = room;
+      roomButtons.forEach((button) => {
+        const isActive = button.dataset.room === room;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+      updateHeading();
+      renderCalendarGrid();
+      updateWeekRange();
+      loadReservations().catch((error) => alert(error.message));
+    }
+
+    calendar.addEventListener('click', (event) => {
+      const cell = event.target.closest('.slot-cell');
+      if (!cell) return;
+
+      const datetime = cell.dataset.datetime;
+
+      if (cell.classList.contains('reserved')) {
+        const name = cell.dataset.name || '';
+        const note = cell.dataset.note || '';
+        document.getElementById('d_datetime').value = formatReservationTime(datetime);
+        document.getElementById('d_name').value = name;
+        document.getElementById('d_note').value = note;
+        detailDialog.dataset.reservationId = cell.dataset.reservationId || '';
+        detailDialog.dataset.datetime = datetime;
+        detailDialog.showModal();
+      } else {
+        document.getElementById('f_datetime').value = formatReservationTime(datetime);
+        document.getElementById('f_name').value = '';
+        document.getElementById('f_note').value = '';
+        reserveDialog.dataset.datetime = datetime;
+        reserveDialog.showModal();
+      }
+    });
+
+    saveBtn.addEventListener('click', async (event) => {
+      event.preventDefault();
+      const datetimeRaw = reserveDialog.dataset.datetime;
+      if (!datetimeRaw) {
+        reserveDialog.close();
+        return;
+      }
+      const name = document.getElementById('f_name').value.trim();
+      const note = document.getElementById('f_note').value.trim();
+      if (!name) {
+        alert('お名前は必須です');
+        return;
+      }
+      try {
+        await api('reserve', { datetime: datetimeRaw, name, note });
+        reserveDialog.close();
+        await loadReservations();
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    deleteBtn.addEventListener('click', async (event) => {
+      event.preventDefault();
+      const id = detailDialog.dataset.reservationId;
+      if (!id) {
+        detailDialog.close();
+        return;
+      }
+      if (!confirm('この予約を取り消しますか？')) {
+        return;
+      }
+      try {
+        await api('cancel', { id });
+        detailDialog.close();
+        await loadReservations();
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+
+    document.querySelectorAll('.week-nav button').forEach((button) => {
+      button.addEventListener('click', () => {
+        const action = button.dataset.action;
+        if (action === 'prev') {
+          state.weekStart.setDate(state.weekStart.getDate() - 7);
+        } else if (action === 'next') {
+          state.weekStart.setDate(state.weekStart.getDate() + 7);
+        } else {
+          state.weekStart = getMonday(new Date());
+        }
+        renderCalendarGrid();
+        updateWeekRange();
+        loadReservations().catch((error) => alert(error.message));
+      });
+    });
+
+    roomButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        if (button.dataset.room !== state.room) {
+          setActiveRoom(button.dataset.room);
+        }
+      });
+    });
+
+    function loadNotices() {
+      const configs = [
+        { key: 'important', element: document.getElementById('notice-important') },
+        { key: 'contribution', element: document.getElementById('notice-contribution') },
+        { key: 'other', element: document.getElementById('notice-other') },
+      ];
+
+      configs.forEach(({ key, element }) => {
+        if (!element) return;
+        element.innerHTML = '<li class="notice-empty">読み込み中です...</li>';
+        fetch(`posts.php?category=${encodeURIComponent(key)}`, { cache: 'no-store' })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(`status ${response.status}`);
+            }
+            return response.json();
+          })
+          .then((data) => {
+            const posts = Array.isArray(data.posts) ? data.posts.slice(0, 5) : [];
+            element.innerHTML = '';
+            if (posts.length === 0) {
+              element.innerHTML = '<li class="notice-empty">投稿はまだありません。</li>';
+              return;
+            }
+            posts.forEach((post) => {
+              const item = document.createElement('li');
+              const title = document.createElement('div');
+              title.className = 'notice-title';
+
+              if (post.pdf_path) {
+                const link = document.createElement('a');
+                link.href = post.pdf_path;
+                link.target = '_blank';
+                link.rel = 'noopener';
+                link.textContent = post.title || 'タイトル未設定';
+                title.appendChild(link);
+              } else {
+                title.textContent = post.title || 'タイトル未設定';
+              }
+
+              const meta = document.createElement('div');
+              meta.className = 'notice-meta';
+              if (post.created_at) {
+                const created = new Date(post.created_at.replace(' ', 'T'));
+                if (!Number.isNaN(created.getTime())) {
+                  meta.textContent = created.toLocaleString('ja-JP');
+                } else {
+                  meta.textContent = post.created_at;
+                }
+              } else {
+                meta.textContent = '日付未設定';
+              }
+
+              item.append(title, meta);
+              element.appendChild(item);
+            });
+          })
+          .catch(() => {
+            element.innerHTML = '<li class="notice-empty">お知らせを読み込めませんでした。</li>';
+          });
+      });
+    }
+
+    // 初期化
+    renderCalendarGrid();
+    updateWeekRange();
+    updateHeading();
+    loadReservations().catch((error) => alert(error.message));
+    loadNotices();
+  });
+</script>
 </body>
 </html>
