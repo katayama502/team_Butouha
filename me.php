@@ -24,7 +24,7 @@ $displayName = $user['display_name'] ?? '';
     <div class="user-home-header__inner">
       <div class="user-menu">
         <span class="user-menu__label">ようこそ、<?= htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8') ?>さん（一般ユーザー）</span>
-        <a class="user-menu__link" href="reservations.php">会議室を予約</a>
+        <a class="user-menu__link" href="reservations_select.php">会議室を予約</a>
         <a class="user-menu__link" href="logout.php">ログアウト</a>
       </div>
       <h1 class="user-home-title">高橋建設</h1>
@@ -36,7 +36,7 @@ $displayName = $user['display_name'] ?? '';
     <section class="user-home-actions" aria-labelledby="quickLinks">
       <h2 id="quickLinks" class="user-home-section-title">クイックアクセス</h2>
       <div class="user-home-buttons">
-        <a class="user-home-button user-home-button--reserve" href="reservations.php">会議室を予約</a>
+        <a class="user-home-button user-home-button--reserve" href="reservations_select.php">会議室を予約</a>
         <a class="user-home-button user-home-button--important" href="form.php">重要なお知らせを見る</a>
         <a class="user-home-button user-home-button--other" href="sonota.php">その他のお知らせを見る</a>
       </div>

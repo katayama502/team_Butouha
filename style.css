@@ -399,6 +399,555 @@ main {
   line-height: 1.6;
 }
 
+/* =============================
+   会議室選択ページ
+   ============================= */
+.page-room-selection {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #f4f7fb 0%, #eef2ff 100%);
+}
+
+.selection-header {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 6px 20px rgba(21, 101, 192, 0.12);
+}
+
+.selection-header__inner {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 28px 16px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: center;
+}
+
+.selection-header__title-area {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  text-align: center;
+}
+
+.selection-title {
+  margin: 0;
+  font-size: clamp(2rem, 3vw, 2.6rem);
+  color: #1a237e;
+  letter-spacing: 0.06em;
+}
+
+.selection-subtitle {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #546e7a;
+}
+
+.selection-main {
+  flex: 1;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 48px 16px 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+
+.selection-main__title {
+  margin: 0;
+  font-size: clamp(1.75rem, 2.5vw, 2.2rem);
+  color: #1a237e;
+  letter-spacing: 0.05em;
+}
+
+.room-options {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.room-option {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  border-radius: 20px;
+  border: 3px solid #f6c453;
+  background: #fffef6;
+  box-shadow: 0 8px 24px rgba(246, 196, 83, 0.18);
+  font-weight: bold;
+  color: #37474f;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.room-option:hover,
+.room-option:focus {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(21, 101, 192, 0.18);
+  border-color: #f7ca65;
+}
+
+.room-option__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: #fff4cd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+.room-option__content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.room-option__title {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #1a237e;
+}
+
+.room-option__description {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: normal;
+  color: #607d8b;
+}
+
+.room-option__chevron {
+  font-size: 1.75rem;
+  color: #1a237e;
+}
+
+@media (max-width: 640px) {
+  .selection-header__inner {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .selection-header__title-area {
+    grid-column: 1;
+  }
+
+  .room-option {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .room-option__icon {
+    margin: 0 auto;
+  }
+
+  .room-option__chevron {
+    display: none;
+  }
+}
+
+/* =============================
+   会議室カレンダーページ
+   ============================= */
+.page-room-calendar {
+  min-height: 100vh;
+  background: #f3f6fb;
+  display: flex;
+  flex-direction: column;
+}
+
+.calendar-header {
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(26, 35, 126, 0.08);
+}
+
+.calendar-header__inner {
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 28px 16px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: center;
+}
+
+.calendar-header__title-area {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.calendar-title {
+  margin: 0;
+  font-size: clamp(2rem, 3vw, 2.6rem);
+  color: #1a237e;
+  letter-spacing: 0.04em;
+}
+
+.calendar-range {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #5c6bc0;
+}
+
+.calendar-main {
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 32px 16px 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.calendar-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.calendar-controls__buttons {
+  display: inline-flex;
+  gap: 12px;
+}
+
+.calendar-nav-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 1.5rem;
+  border-radius: 999px;
+  background: #e3f2fd;
+  color: #1565c0;
+  font-weight: bold;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.calendar-nav-button:hover,
+.calendar-nav-button:focus {
+  background: #bbdefb;
+  transform: translateY(-1px);
+}
+
+.calendar-nav-button--today {
+  background: #c5cae9;
+  color: #283593;
+}
+
+.calendar-nav-button--refresh {
+  background: #ede7f6;
+  color: #512da8;
+}
+
+.calendar-wrapper {
+  overflow-x: auto;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 10px 28px rgba(63, 81, 181, 0.12);
+  padding: 24px;
+}
+
+.calendar-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 720px;
+}
+
+.calendar-table__time {
+  position: sticky;
+  left: 0;
+  background: #fff;
+  font-weight: 600;
+  color: #3949ab;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #e8eaf6;
+}
+
+.calendar-table__day {
+  text-align: center;
+  font-weight: 600;
+  color: #3949ab;
+  padding: 0.85rem 0.5rem;
+  border-bottom: 1px solid #e8eaf6;
+}
+
+.calendar-table__day.is-today {
+  color: #1a237e;
+  background: rgba(197, 202, 233, 0.35);
+}
+
+.calendar-cell {
+  height: 72px;
+  padding: 8px;
+  border-bottom: 1px solid #edf2ff;
+  border-right: 1px solid #edf2ff;
+}
+
+.calendar-cell.is-today {
+  background: rgba(227, 242, 253, 0.35);
+}
+
+.calendar-cell:last-child {
+  border-right: none;
+}
+
+.calendar-cell--available {
+  text-align: center;
+}
+
+.calendar-slot {
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  border: 2px dashed #ef5350;
+  background: rgba(255, 255, 255, 0.8);
+  color: #ef5350;
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.calendar-slot:hover,
+.calendar-slot:focus {
+  transform: translateY(-2px);
+  background: #fff3f3;
+  box-shadow: 0 8px 18px rgba(244, 67, 54, 0.15);
+}
+
+.calendar-cell--reserved {
+  padding: 10px 8px;
+}
+
+.reservation-chip {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #90caf9 0%, #5c6bc0 100%);
+  color: #fff;
+  padding: 12px;
+  box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.2), 0 8px 16px rgba(63, 81, 181, 0.2);
+}
+
+.reservation-chip__icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.reservation-chip__content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.reservation-chip__title {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.reservation-chip__meta {
+  font-size: 0.85rem;
+  opacity: 0.85;
+}
+
+.calendar-legend {
+  margin: 16px 0 0;
+  font-size: 0.9rem;
+  color: #546e7a;
+}
+
+.calendar-alert {
+  background: #fff3e0;
+  border-left: 4px solid #ff9800;
+  padding: 12px 16px;
+  border-radius: 12px;
+  color: #e65100;
+}
+
+.calendar-message {
+  min-height: 1.5rem;
+  text-align: center;
+  font-size: 1rem;
+  color: #1a237e;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.calendar-message.is-visible {
+  opacity: 1;
+}
+
+.calendar-message--error {
+  color: #c62828;
+}
+
+.reservation-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.reservation-modal.is-open {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.reservation-modal__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.reservation-modal__content {
+  position: relative;
+  width: min(420px, 90vw);
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 24px 60px rgba(26, 35, 126, 0.25);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.reservation-modal__title {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #1a237e;
+}
+
+.reservation-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.reservation-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reservation-form__label {
+  font-weight: 600;
+  color: #3949ab;
+}
+
+.reservation-form input[type="datetime-local"],
+.reservation-form textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #c5cae9;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.reservation-form input[type="datetime-local"]:focus,
+.reservation-form textarea:focus {
+  outline: none;
+  border-color: #5c6bc0;
+  box-shadow: 0 0 0 3px rgba(92, 107, 192, 0.2);
+}
+
+.reservation-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.reservation-button {
+  padding: 0.6rem 1.6rem;
+  border-radius: 999px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(135deg, #5c6bc0, #3949ab);
+  color: #fff;
+  box-shadow: 0 8px 16px rgba(63, 81, 181, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.reservation-button:hover,
+.reservation-button:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px rgba(63, 81, 181, 0.26);
+}
+
+.reservation-button--sub {
+  background: #eceff1;
+  color: #37474f;
+  box-shadow: none;
+}
+
+.reservation-button--sub:hover,
+.reservation-button--sub:focus {
+  background: #e0e0e0;
+}
+
+@media (max-width: 768px) {
+  .calendar-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .calendar-controls__buttons {
+    justify-content: center;
+  }
+
+  .calendar-wrapper {
+    padding: 16px;
+  }
+
+  .calendar-cell {
+    height: 64px;
+  }
+
+  .reservation-chip {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
 .home-error small {
   display: block;
   margin-top: 0.5rem;
