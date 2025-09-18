@@ -2,7 +2,12 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
+require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/database.php';
+
+requireLogin();
+$user = getAuthenticatedUser();
+$isAdmin = ($user['role'] ?? '') === 'admin';
 
 $categories = require __DIR__ . '/categories.php';
 $counts = [];
@@ -32,14 +37,19 @@ try {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>お知らせアプリ</title>
-  <link rel="stylesheet" href="style1.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body class="page-home">
   <header class="home-header">
+    <div class="user-menu">
+      <span class="user-menu__label">ようこそ、<?= htmlspecialchars($user['display_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>さん（<?= ($user['role'] ?? '') === 'admin' ? '管理者' : '一般ユーザー' ?>）</span>
+      <a class="user-menu__link" href="reservations.php">会議室を予約</a>
+      <a class="user-menu__link" href="logout.php">ログアウト</a>
+    </div>
     <h1 class="main-title">お知らせ</h1>
     <nav class="tabs" aria-label="カテゴリ切り替え">
       <a class="tab tab-link" data-cat="重要" href="form.php">重要 (<?= $counts['重要'] ?>)</a>
-      <a class="tab tab-link" data-cat="地域貢献" href="boranthia.php">地域貢献 (<?= $counts['地域貢献'] ?>)</a>
+      <a class="tab <?= $isAdmin ? 'tab-link' : 'tab-disabled' ?>" data-cat="地域貢献" <?= $isAdmin ? 'href="boranthia.php"' : 'href="#" aria-disabled="true" title="管理者のみ閲覧できます"' ?>>地域貢献 (<?= $counts['地域貢献'] ?>)</a>
       <a class="tab tab-link" data-cat="その他" href="sonota.php">その他 (<?= $counts['その他'] ?>)</a>
     </nav>
   </header>
@@ -61,6 +71,7 @@ try {
 
     <section class="cta-section">
       <a href="form.php" class="cta-button">重要なお知らせ一覧を見る</a>
+      <a href="reservations.php" class="cta-button secondary">会議室の予約状況</a>
     </section>
   </main>
 </body>

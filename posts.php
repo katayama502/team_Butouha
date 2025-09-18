@@ -4,6 +4,9 @@ error_reporting(E_ALL);
 
 header('Content-Type: application/json; charset=utf-8');
 
+require_once __DIR__ . '/auth.php';
+requireLogin();
+$user = getAuthenticatedUser();
 require_once __DIR__ . '/database.php';
 
 $categories = require __DIR__ . '/categories.php';
@@ -18,6 +21,14 @@ if (!isset($categories[$categoryKey])) {
 }
 
 $table = $categories[$categoryKey]['table'];
+
+if ($categoryKey === 'contribution' && ($user['role'] ?? '') !== 'admin') {
+    http_response_code(403);
+    echo json_encode([
+        'error' => 'このカテゴリの閲覧権限がありません。',
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
 
 try {
     $pdo = getPdo();

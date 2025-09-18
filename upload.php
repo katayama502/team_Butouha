@@ -2,6 +2,8 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
+require_once __DIR__ . '/auth.php';
+requireAdmin();
 require_once __DIR__ . '/database.php';
 
 $categories = require __DIR__ . '/categories.php';
