@@ -92,6 +92,193 @@ main {
 }
 
 /* =============================
+   一般ユーザーホーム (me.php)
+   ============================= */
+.page-user-home {
+  background: #f4f4f4;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-home-header {
+  background-color: #2c3e50;
+  color: #fff;
+}
+
+.user-home-header__inner {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 36px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.user-home-header__inner .user-menu {
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.user-home-header .user-menu__label {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.user-home-header .user-menu__link {
+  color: #ffecb3;
+}
+
+.user-home-header .user-menu__link:hover,
+.user-home-header .user-menu__link:focus {
+  color: #fff3cd;
+}
+
+.user-home-title {
+  margin: 0;
+  font-size: 3rem;
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+
+.user-home-subtitle {
+  margin: 0;
+  font-size: 1.1rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.user-home-main {
+  flex: 1;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 16px 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3rem;
+}
+
+.user-home-section-title {
+  margin: 0 0 1.25rem;
+  font-size: 1.75rem;
+  text-align: center;
+  color: #2c3e50;
+}
+
+.user-home-buttons {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.user-home-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: min(90%, 420px);
+  padding: 1.1rem 2.5rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  text-align: center;
+}
+
+.user-home-button:hover,
+.user-home-button:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18);
+}
+
+.user-home-button--reserve {
+  background-color: #e74c3c;
+}
+
+.user-home-button--important {
+  background-color: #27ae60;
+}
+
+.user-home-button--other {
+  background-color: #2980b9;
+}
+
+.user-home-button--reserve:hover,
+.user-home-button--reserve:focus {
+  opacity: 0.92;
+}
+
+.user-home-button--important:hover,
+.user-home-button--important:focus {
+  opacity: 0.92;
+}
+
+.user-home-button--other:hover,
+.user-home-button--other:focus {
+  opacity: 0.92;
+}
+
+.user-home-schedule {
+  width: 100%;
+  background-color: #ecf0f1;
+  padding: 28px 24px 32px;
+  border-radius: 14px;
+  box-shadow: var(--shadow-card);
+}
+
+.user-home-schedule__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 1.05rem;
+  color: #34495e;
+}
+
+.user-home-schedule__item {
+  line-height: 1.6;
+}
+
+.user-home-schedule__item--day {
+  font-weight: bold;
+  color: #2c3e50;
+  margin-top: 0.75rem;
+}
+
+.user-home-schedule__item--day:first-child {
+  margin-top: 0;
+}
+
+@media (max-width: 600px) {
+  .user-home-header__inner {
+    padding: 28px 16px 24px;
+  }
+
+  .user-home-title {
+    font-size: 2.4rem;
+  }
+
+  .user-home-main {
+    padding: 36px 16px 48px;
+    gap: 2.5rem;
+  }
+
+  .user-home-button {
+    width: 100%;
+    font-size: 1.35rem;
+  }
+
+  .user-home-schedule {
+    padding: 24px 20px 28px;
+  }
+}
+
+/* =============================
    ホームページ (index.php)
    ============================= */
 .page-home {

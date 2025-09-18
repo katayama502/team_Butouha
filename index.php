@@ -9,6 +9,11 @@ requireLogin();
 $user = getAuthenticatedUser();
 $isAdmin = ($user['role'] ?? '') === 'admin';
 
+if (!$isAdmin) {
+    header('Location: me.php');
+    exit;
+}
+
 $categories = require __DIR__ . '/categories.php';
 $counts = [];
 foreach ($categories as $category) {

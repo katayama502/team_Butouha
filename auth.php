@@ -38,3 +38,16 @@ function renderForbiddenPage(string $message): void
     include __DIR__ . '/forbidden.php';
     exit;
 }
+
+function redirectToHome(): void
+{
+    $user = getAuthenticatedUser();
+    if (!$user) {
+        header('Location: login.php');
+        exit;
+    }
+
+    $destination = ($user['role'] ?? '') === 'admin' ? 'index.php' : 'me.php';
+    header('Location: ' . $destination);
+    exit;
+}
