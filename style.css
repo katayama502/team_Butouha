@@ -330,11 +330,6 @@ main {
   color: var(--color-important);
 }
 
-.tab[data-cat="地域貢献"] {
-  background: #e0f7fa;
-  color: #0288d1;
-}
-
 .tab[data-cat="その他"] {
   background: #f1f8e9;
   color: #388e3c;
@@ -347,12 +342,6 @@ main {
 .tab-link:hover,
 .tab-link:focus {
   transform: translateY(-2px);
-}
-
-.tab-disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  pointer-events: none;
 }
 
 .home-main {
