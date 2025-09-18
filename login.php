@@ -3,8 +3,7 @@ require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/database.php';
 
 if (isAuthenticated()) {
-    header('Location: index.php');
-    exit;
+    redirectToHome();
 }
 
 $username = '';
@@ -37,8 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'role' => $user['role'],
                     'display_name' => $user['display_name'],
                 ];
-                header('Location: index.php');
-                exit;
+                redirectToHome();
             }
 
             $errors[] = 'ユーザー名またはパスワードが正しくありません。';
