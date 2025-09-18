@@ -70,7 +70,6 @@ $formTitle = $category['formTitle'];
   <script>
     const CATEGORY_LABELS = {
       important: '重要',
-      contribution: '地域貢献',
       other: 'その他',
     };
 

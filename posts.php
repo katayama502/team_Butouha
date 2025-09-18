@@ -22,14 +22,6 @@ if (!isset($categories[$categoryKey])) {
 
 $table = $categories[$categoryKey]['table'];
 
-if ($categoryKey === 'contribution' && ($user['role'] ?? '') !== 'admin') {
-    http_response_code(403);
-    echo json_encode([
-        'error' => 'このカテゴリの閲覧権限がありません。',
-    ], JSON_UNESCAPED_UNICODE);
-    exit;
-}
-
 try {
     $pdo = getPdo();
     $stmt = $pdo->query(sprintf('SELECT id, title, pdf_path, audio_path, created_at FROM `%s` ORDER BY created_at DESC', $table));
