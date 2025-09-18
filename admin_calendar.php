@@ -32,7 +32,7 @@ try {
 
 $monthEnd = $monthStart->modify('+1 month');
 
-$selectedDateParam = filter_input(INPUT_GET, 'selected_date', FILTER_SANITIZE_STRING);
+$selectedDateParam = filter_input(INPUT_GET, 'selected_date', FILTER_UNSAFE_RAW);
 $selectedDate = null;
 if ($selectedDateParam) {
     $candidate = DateTimeImmutable::createFromFormat('Y-m-d', $selectedDateParam, $timezone);
