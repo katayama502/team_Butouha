@@ -6,5 +6,5 @@ $charset = 'utf8mb4';
 return [
     'dsn' => sprintf('mysql:host=%s;dbname=%s;charset=%s', $host, $database, $charset),
     'username' => getenv('DB_USER') ?: 'root',
-    'password' => getenv('DB_PASS') ?: '',
+    'password' => getenv('DB_PASS') ?: 'root',
 ];
