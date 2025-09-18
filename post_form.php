@@ -59,6 +59,45 @@ $formTitle = $category['formTitle'];
   </main>
 
   <script>
+    const CATEGORY_LABELS = {
+      important: '重要',
+      contribution: '地域貢献',
+      other: 'その他',
+    };
+
+    (function synchronizeCategorySelection() {
+      const categoryInput = document.querySelector('input[name="category"]');
+      const categoryLabelElement = document.querySelector('.post-category strong');
+      let storedCategory = null;
+
+      try {
+        storedCategory = sessionStorage.getItem('selectedCategory');
+      } catch (error) {
+        storedCategory = null;
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlCategory = urlParams.get('category');
+
+      const resolvedCategory = urlCategory || storedCategory || (categoryInput ? categoryInput.value : '');
+
+      if (categoryInput && resolvedCategory && categoryInput.value !== resolvedCategory) {
+        categoryInput.value = resolvedCategory;
+      }
+
+      if (categoryLabelElement && resolvedCategory && CATEGORY_LABELS[resolvedCategory]) {
+        categoryLabelElement.textContent = CATEGORY_LABELS[resolvedCategory];
+      }
+
+      if (storedCategory) {
+        try {
+          sessionStorage.removeItem('selectedCategory');
+        } catch (removeError) {
+          // sessionStorage が使用できない場合は無視
+        }
+      }
+    })();
+
     let mediaRecorder;
     let audioChunks = [];
 
