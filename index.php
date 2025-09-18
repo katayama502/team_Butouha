@@ -31,8 +31,8 @@ try {
     <h1 class="main-title">お知らせ</h1>
     <nav class="tabs" aria-label="カテゴリ切り替え">
       <a class="tab tab-link" data-cat="重要" href="form.php">重要 (<?= $counts['重要'] ?>)</a>
-      <span class="tab tab-disabled" data-cat="地域貢献" aria-disabled="true">地域貢献 (<?= $counts['地域貢献'] ?>)</span>
-      <span class="tab tab-disabled" data-cat="その他" aria-disabled="true">その他 (<?= $counts['その他'] ?>)</span>
+      <a class="tab tab-link" data-cat="地域貢献" href="boranthia.php">地域貢献 (<?= $counts['地域貢献'] ?>)</a>
+      <a class="tab tab-link" data-cat="その他" href="sonota.php">その他 (<?= $counts['その他'] ?>)</a>
     </nav>
   </header>
 
