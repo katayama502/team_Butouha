@@ -13,7 +13,7 @@
   </header>
 
   <main class="contribution-main">
-    <div class="contribution-label">その他</div>
+    <div class="important-label">その他</div>
 
     <div class="posts-container" id="postsContainer" aria-live="polite" data-endpoint="posts.php?category=other">
       <p class="post-message">投稿を読み込んでいます...</p>
