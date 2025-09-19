@@ -17,11 +17,6 @@ $roomPages = [
         'description' => '4〜6名での打ち合わせに最適なコンパクトな会議室です。',
         'link' => 'room_calendar.php?room=small',
     ],
-    'other' => [
-        'label' => 'その他',
-        'description' => 'フリースペースや臨時利用スペースの予定を確認できます。',
-        'link' => 'room_calendar.php?room=other',
-    ],
 ];
 ?>
 <!DOCTYPE html>
@@ -57,8 +52,6 @@ $roomPages = [
               $icon = '📌';
               if ($roomKey === 'large') {
                   $icon = '🏢';
-              } elseif ($roomKey === 'other') {
-                  $icon = '🗂️';
               }
             ?>
             <?= $icon ?>
