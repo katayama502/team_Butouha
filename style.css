@@ -1070,29 +1070,43 @@ main {
 /* =============================
    重要お知らせ一覧 (form.php)
    ============================= */
-.page-important {
+.page-important,
+.page-contribution {
   position: relative;
   padding-bottom: 120px;
 }
 
-.important-main {
+.important-main,
+.contribution-main {
   max-width: 960px;
   margin: 0 auto;
   padding: 0 24px 40px;
 }
 
-.important-label {
+.important-label,
+.contribution-label {
   position: fixed;
   top: 24px;
   left: 24px;
-  font-size: 56px;
   font-weight: bold;
-  color: var(--color-important);
   user-select: none;
   z-index: 10;
+  line-height: 1.1;
+  max-width: calc(100% - 48px);
 }
 
-.posts-container {
+.important-label {
+  color: var(--color-important);
+  font-size: clamp(2.5rem, 6vw, 3.5rem);
+}
+
+.contribution-label {
+  color: #388e3c;
+  font-size: clamp(2.25rem, 5.5vw, 2.8125rem);
+}
+
+.page-important .posts-container,
+.page-contribution .posts-container {
   margin-top: 140px;
   display: flex;
   flex-direction: column;
@@ -1107,6 +1121,7 @@ main {
   display: flex;
   align-items: center;
   gap: 20px;
+  width: 100%;
 }
 
 .post img {
@@ -1983,6 +1998,24 @@ main {
 /* =============================
    レスポンシブ対応
    ============================= */
+@media (max-width: 900px) {
+  .important-main,
+  .contribution-main {
+    padding: 0 20px 36px;
+  }
+
+  .page-important .posts-container,
+  .page-contribution .posts-container {
+    margin-top: 120px;
+  }
+
+  .important-label,
+  .contribution-label {
+    top: 16px;
+    left: 16px;
+  }
+}
+
 @media (max-width: 600px) {
   .main-title {
     font-size: 2.5rem;
@@ -1993,10 +2026,6 @@ main {
     min-width: 150px;
   }
 
-  .important-label {
-    font-size: 44px;
-  }
-
   .post {
     flex-direction: column;
     align-items: flex-start;
@@ -2005,6 +2034,24 @@ main {
   .post img {
     width: 100%;
     height: auto;
+  }
+
+  .important-main,
+  .contribution-main {
+    padding: 0 16px 32px;
+  }
+
+  .page-important .posts-container,
+  .page-contribution .posts-container {
+    margin-top: 24px;
+  }
+
+  .important-label,
+  .contribution-label {
+    position: static;
+    margin: 0 auto 16px;
+    text-align: center;
+    max-width: none;
   }
 
   .post-button {
@@ -2037,15 +2084,5 @@ main {
   .reservation-list {
     padding: 20px;
   }
-}
-.contribution-label{
-position: fixed;
-    top: 24px;
-    left: 24px;
-    font-size: 45px;
-    font-weight: bold;
-    color: #388e3c;
-    user-select: none;
-    z-index: 10
 }
     
