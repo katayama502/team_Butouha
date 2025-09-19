@@ -51,6 +51,9 @@ try {
       <a class="user-menu__link" href="admin_calendar.php">予定を予約</a>
       <a class="user-menu__link" href="logout.php">ログアウト</a>
     </div>
+    <div class="home-logo">
+      <img class="site-logo" src="logo.jpg" alt="T-link ロゴ">
+    </div>
     <h1 class="main-title">お知らせ</h1>
     <nav class="tabs" aria-label="カテゴリ切り替え">
       <?php foreach ($categories as $category): ?>

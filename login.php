@@ -56,7 +56,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="page-login">
   <main class="login-main">
-    <h1>T-link</h1>
+    <h1 class="login-title">
+      <img class="site-logo login-logo" src="logo.jpg" alt="T-link ロゴ">
+      <span class="visually-hidden">T-link</span>
+    </h1>
     <p class="login-description">管理者は重要・その他のお知らせを投稿でき、一般ユーザーは閲覧と会議室予約が可能です。</p>
     <?php if ($errors): ?>
       <div class="alert alert-error">
