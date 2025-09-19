@@ -13,7 +13,7 @@ $user = getAuthenticatedUser();
 </head>
 <body class="page-important" data-category="important">
   <header class="page-header">
-    <a class="back-link" href="index.php">&larr; トップへ戻る</a>
+    <a class="back-link" href="index.php">&larr; ホームに戻る</a>
     <h1 class="page-title">重要なお知らせ</h1>
     <div class="user-menu">
       <span class="user-menu__label"><?= htmlspecialchars(($user['display_name'] ?? '') . '（' . (($user['role'] ?? '') === 'admin' ? '管理者' : '一般ユーザー') . '）', ENT_QUOTES, 'UTF-8') ?></span>

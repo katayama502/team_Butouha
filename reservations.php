@@ -89,7 +89,7 @@ try {
 </head>
 <body class="page-reservations">
   <header class="page-header">
-    <a class="back-link" href="index.php">&larr; トップへ戻る</a>
+    <a class="back-link" href="index.php">&larr; ホームに戻る</a>
     <h1 class="page-title">会議室予約</h1>
     <div class="user-menu">
       <span class="user-menu__label"><?= htmlspecialchars(($user['display_name'] ?? '') . '（' . ($user['role'] === 'admin' ? '管理者' : '一般ユーザー') . '）', ENT_QUOTES, 'UTF-8') ?></span>

@@ -177,7 +177,7 @@ $todayKey = $today->format('Y-m-d');
                       <span class="reservation-chip__icon" aria-hidden="true"><?= htmlspecialchars($initial, ENT_QUOTES, 'UTF-8') ?></span>
                       <div class="reservation-chip__content">
                         <span class="reservation-chip__title"><?= htmlspecialchars($note, ENT_QUOTES, 'UTF-8') ?></span>
-                        <span class="reservation-chip__meta">担当：<?= htmlspecialchars($reservation['reserved_for'], ENT_QUOTES, 'UTF-8') ?></span>
+                        <span class="reservation-chip__meta">予約者：<?= htmlspecialchars($reservation['reserved_for'], ENT_QUOTES, 'UTF-8') ?></span>
                         <?php if (!empty($reservation['document_path'])): ?>
                           <a class="reservation-chip__attachment" href="<?= htmlspecialchars($reservation['document_path'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">📄 資料を見る</a>
                         <?php endif; ?>
@@ -223,10 +223,27 @@ $todayKey = $today->format('Y-m-d');
     <div class="reservation-modal__overlay" data-close-modal></div>
     <div class="reservation-modal__content">
       <h2 class="reservation-modal__title">予約の作成</h2>
-      <form id="reservationForm" class="reservation-form" data-room="<?= htmlspecialchars($room, ENT_QUOTES, 'UTF-8') ?>" data-endpoint="reservation_calendar_api.php" data-delete-endpoint="reservation_delete_api.php">
+      <form
+        id="reservationForm"
+        class="reservation-form"
+        data-room="<?= htmlspecialchars($room, ENT_QUOTES, 'UTF-8') ?>"
+        data-endpoint="reservation_calendar_api.php"
+        data-delete-endpoint="reservation_delete_api.php"
+        data-default-reserved-for="<?= htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8') ?>"
+      >
         <label class="reservation-form__field">
           <span class="reservation-form__label">日時</span>
           <input type="datetime-local" id="reservationDateTime" name="reserved_at" required>
+        </label>
+        <label class="reservation-form__field">
+          <span class="reservation-form__label">予約者</span>
+          <input
+            type="text"
+            id="reservationReservedFor"
+            name="reserved_for"
+            value="<?= htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8') ?>"
+            required
+          >
         </label>
         <label class="reservation-form__field">
           <span class="reservation-form__label">メモ</span>
