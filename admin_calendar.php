@@ -324,7 +324,7 @@ $selectedDayLabel = $selectedDate->format('Y年n月j日') . '（' . $weekdayLabe
 <body class="page-admin-calendar">
   <header class="admin-calendar-header">
     <div class="admin-calendar-header__inner">
-      <a class="back-link" href="index.php">&larr; 管理トップに戻る</a>
+      <a class="back-link" href="index.php">&larr; 管理ホームに戻る</a>
       <div class="admin-calendar-header__titles">
         <h1 class="admin-calendar-title">予定カレンダー</h1>
         <p class="admin-calendar-subtitle">カレンダーから日付を選んで、PDF資料付きで予定を登録できます。</p>

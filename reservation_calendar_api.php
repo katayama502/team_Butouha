@@ -41,6 +41,7 @@ $validRooms = [
 ];
 $room = isset($input['room']) ? (string) $input['room'] : '';
 $reservedAtInput = isset($input['reserved_at']) ? (string) $input['reserved_at'] : '';
+$reservedFor = isset($input['reserved_for']) ? trim((string) $input['reserved_for']) : '';
 $note = isset($input['note']) ? trim((string) $input['note']) : '';
 
 $errors = [];
@@ -72,6 +73,14 @@ if ($reservedAt instanceof DateTimeImmutable) {
     }
 }
 
+if ($reservedFor === '') {
+    if ($displayName !== '') {
+        $reservedFor = $displayName;
+    } else {
+        $errors[] = '予約者を入力してください。';
+    }
+}
+
 if ($errors) {
     http_response_code(422);
     header('Content-Type: application/json; charset=UTF-8');
@@ -86,7 +95,7 @@ try {
         ':room' => $room,
         ':reserved_at' => $reservedAt->format('Y-m-d H:i:s'),
         ':user_id' => $user['id'],
-        ':reserved_for' => $displayName !== '' ? $displayName : '利用者',
+        ':reserved_for' => $reservedFor,
         ':note' => $note !== '' ? $note : null,
         ':document_path' => null,
     ]);
@@ -97,7 +106,7 @@ try {
         'reservation' => [
             'room' => $room,
             'reserved_at' => $reservedAt->format('Y-m-d\TH:i'),
-            'reserved_for' => $displayName !== '' ? $displayName : '利用者',
+            'reserved_for' => $reservedFor,
             'note' => $note,
             'document_path' => null,
         ],

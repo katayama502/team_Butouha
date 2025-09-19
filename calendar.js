@@ -4,6 +4,7 @@
   const form = document.getElementById('reservationForm');
   const dateInput = document.getElementById('reservationDateTime');
   const noteInput = document.getElementById('reservationNote');
+  const reservedForInput = document.getElementById('reservationReservedFor');
   const closeButtons = document.querySelectorAll('[data-close-modal]');
   const messageArea = document.querySelector('.calendar-message');
   const refreshButton = document.querySelector('[data-calendar-refresh]');
@@ -15,6 +16,7 @@
   const endpoint = form.dataset.endpoint || form.getAttribute('action') || 'reservation_calendar_api.php';
   const room = form.dataset.room || '';
   const deleteEndpoint = form.dataset.deleteEndpoint || 'reservation_delete_api.php';
+  const defaultReservedFor = form.dataset.defaultReservedFor || '';
   const deleteButtons = document.querySelectorAll('[data-reservation-delete]');
 
   function setMessage(text, isError = false) {
@@ -33,6 +35,9 @@
   function openModal(datetimeValue) {
     dateInput.value = datetimeValue || '';
     noteInput.value = '';
+    if (reservedForInput) {
+      reservedForInput.value = defaultReservedFor;
+    }
     modal.classList.add('is-open');
     modal.setAttribute('aria-hidden', 'false');
     window.setTimeout(() => {
@@ -129,8 +134,13 @@
     event.preventDefault();
     const reservedAt = dateInput.value.trim();
     const note = noteInput.value.trim();
+    const reservedFor = reservedForInput ? reservedForInput.value.trim() : '';
     if (!reservedAt) {
       setMessage('予約日時を入力してください。', true);
+      return;
+    }
+    if (reservedForInput && !reservedFor) {
+      setMessage('予約者を入力してください。', true);
       return;
     }
 
@@ -151,6 +161,7 @@
         body: JSON.stringify({
           room,
           reserved_at: reservedAt,
+          reserved_for: reservedFor,
           note,
         }),
       });

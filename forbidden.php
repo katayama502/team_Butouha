@@ -20,7 +20,7 @@ $forbiddenMessage = $forbiddenMessage ?? 'このページにはアクセスで�
     <p><?= nl2br(htmlspecialchars($forbiddenMessage, ENT_QUOTES, 'UTF-8')) ?></p>
     <?php if (isAuthenticated()): ?>
       <div class="cta-section">
-        <a class="cta-button" href="index.php">トップへ戻る</a>
+        <a class="cta-button" href="index.php">ホームに戻る</a>
       </div>
     <?php else: ?>
       <div class="cta-section">
