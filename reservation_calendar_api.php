@@ -34,7 +34,11 @@ if (stripos($contentType, 'application/json') !== false) {
     $input = $_POST;
 }
 
-$validRooms = ['large' => '大会議室', 'small' => '小会議室'];
+$validRooms = [
+    'large' => '大会議室',
+    'small' => '小会議室',
+    'other' => 'その他',
+];
 $room = isset($input['room']) ? (string) $input['room'] : '';
 $reservedAtInput = isset($input['reserved_at']) ? (string) $input['reserved_at'] : '';
 $note = isset($input['note']) ? trim((string) $input['note']) : '';

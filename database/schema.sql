@@ -43,7 +43,7 @@ ON DUPLICATE KEY UPDATE
 
 CREATE TABLE IF NOT EXISTS `reservations` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `room` ENUM('large','small') NOT NULL,
+  `room` ENUM('large','small','other') NOT NULL,
   `reserved_at` DATETIME NOT NULL,
   `user_id` INT UNSIGNED NOT NULL,
   `reserved_for` VARCHAR(100) NOT NULL,

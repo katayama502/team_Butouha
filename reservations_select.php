@@ -17,6 +17,11 @@ $roomPages = [
         'description' => '4〜6名での打ち合わせに最適なコンパクトな会議室です。',
         'link' => 'room_calendar.php?room=small',
     ],
+    'other' => [
+        'label' => 'その他',
+        'description' => 'フリースペースや臨時利用スペースの予定を確認できます。',
+        'link' => 'room_calendar.php?room=other',
+    ],
 ];
 ?>
 <!DOCTYPE html>
@@ -48,7 +53,15 @@ $roomPages = [
       <?php foreach ($roomPages as $roomKey => $room): ?>
         <a class="room-option" role="listitem" href="<?= htmlspecialchars($room['link'], ENT_QUOTES, 'UTF-8') ?>">
           <div class="room-option__icon" aria-hidden="true">
-            <?= $roomKey === 'large' ? '🏢' : '📌' ?>
+            <?php
+              $icon = '📌';
+              if ($roomKey === 'large') {
+                  $icon = '🏢';
+              } elseif ($roomKey === 'other') {
+                  $icon = '🗂️';
+              }
+            ?>
+            <?= $icon ?>
           </div>
           <div class="room-option__content">
             <h3 class="room-option__title"><?= htmlspecialchars($room['label'], ENT_QUOTES, 'UTF-8') ?></h3>

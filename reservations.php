@@ -12,7 +12,11 @@ $reservedAtInput = isset($_POST['reserved_at']) ? (string) $_POST['reserved_at']
 $reservedFor = isset($_POST['reserved_for']) ? trim((string) $_POST['reserved_for']) : ($user['display_name'] ?? '');
 $note = isset($_POST['note']) ? trim((string) $_POST['note']) : '';
 
-$validRooms = ['small' => '小会議室', 'large' => '大会議室'];
+$validRooms = [
+    'small' => '小会議室',
+    'large' => '大会議室',
+    'other' => 'その他',
+];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!isset($validRooms[$room])) {

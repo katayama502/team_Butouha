@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/database.php';
+require_once __DIR__ . '/reservation_service.php';
 
 requireAdmin();
 
@@ -12,6 +13,18 @@ $validRooms = [
     'small' => '小会議室',
     'other' => 'その他'
 ];
+
+function moveToNearestWeekday(DateTimeImmutable $date): DateTimeImmutable
+{
+    $dayNumber = (int) $date->format('N');
+    if ($dayNumber === 6) {
+        return $date->modify('+2 days');
+    }
+    if ($dayNumber === 7) {
+        return $date->modify('+1 day');
+    }
+    return $date;
+}
 
 $timezone = new DateTimeZone('Asia/Tokyo');
 $today = new DateTimeImmutable('today', $timezone);
@@ -45,6 +58,8 @@ if (!$selectedDate) {
     $selectedDate = $today->format('Y-m') === $monthStart->format('Y-m') ? $today : $monthStart;
 }
 
+$selectedDate = moveToNearestWeekday($selectedDate);
+
 $errors = [];
 $successMessage = null;
 
@@ -53,7 +68,58 @@ $reservedForValue = isset($_POST['reserved_for']) ? trim((string) $_POST['reserv
 $noteValue = isset($_POST['note']) ? trim((string) $_POST['note']) : '';
 $reservedAtValue = isset($_POST['reserved_at']) ? (string) $_POST['reserved_at'] : $selectedDate->format('Y-m-d') . 'T09:00';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_reservation_id'])) {
+    $deleteId = filter_input(INPUT_POST, 'delete_reservation_id', FILTER_VALIDATE_INT);
+    $formYear = isset($_POST['current_year']) ? (int) $_POST['current_year'] : (int) $monthStart->format('Y');
+    $formMonth = isset($_POST['current_month']) ? (int) $_POST['current_month'] : (int) $monthStart->format('n');
+    $selectedDateInput = isset($_POST['selected_date']) ? (string) $_POST['selected_date'] : $selectedDate->format('Y-m-d');
+
+    if ($deleteId === false || $deleteId <= 0) {
+        $errors[] = '削除対象の予約が正しく指定されていません。';
+    } else {
+        try {
+            $pdo = getPdo();
+            $deleteResult = deleteReservation($pdo, $deleteId, $user);
+            if ($deleteResult['success']) {
+                $deletedReservation = $deleteResult['reservation'];
+                $reservationDate = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $deletedReservation['reserved_at'], $timezone);
+                if ($reservationDate instanceof DateTimeImmutable) {
+                    $selectedDateInput = $reservationDate->format('Y-m-d');
+                }
+                $roomLabel = $validRooms[$deletedReservation['room']] ?? $deletedReservation['room'];
+                $reservationLabel = $reservationDate instanceof DateTimeImmutable ? $reservationDate->format('Y/m/d H:i') : '';
+                $messageText = $reservationLabel !== ''
+                    ? sprintf('%sの予約（%s）を削除しました。', $roomLabel, $reservationLabel)
+                    : sprintf('%sの予約を削除しました。', $roomLabel);
+
+                $redirectQuery = http_build_query([
+                    'year' => $formYear,
+                    'month' => $formMonth,
+                    'selected_date' => $selectedDateInput,
+                    'success' => 1,
+                    'message' => $messageText,
+                ]);
+                header('Location: admin_calendar.php?' . $redirectQuery);
+                exit;
+            }
+
+            $errors[] = $deleteResult['error'] !== ''
+                ? $deleteResult['error']
+                : '予約を削除できませんでした。';
+        } catch (Throwable $exception) {
+            $errors[] = '予約の削除に失敗しました。時間をおいて再度お試しください。';
+        }
+    }
+
+    try {
+        $candidate = new DateTimeImmutable($selectedDateInput, $timezone);
+        if ($candidate instanceof DateTimeImmutable) {
+            $selectedDate = moveToNearestWeekday($candidate);
+        }
+    } catch (Exception $exception) {
+        // ignore invalid selected date
+    }
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $room = $selectedRoomValue;
     $reservedAtInput = $reservedAtValue;
     $reservedFor = $reservedForValue;
@@ -170,7 +236,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         $candidate = new DateTimeImmutable($selectedDateInput, $timezone);
-        $selectedDate = $candidate;
+        if ($candidate instanceof DateTimeImmutable) {
+            $selectedDate = moveToNearestWeekday($candidate);
+        }
     } catch (Exception $exception) {
         // ignore
     }
@@ -186,10 +254,16 @@ if (isset($_GET['success']) && $_GET['success'] !== '') {
     $successMessage = $messageParam !== null ? $messageParam : '予約を登録しました。';
 }
 
-$calendarStart = $monthStart->modify('-' . (int) $monthStart->format('w') . ' days');
+$calendarStart = $monthStart->modify('monday this week');
+$lastDayOfMonth = $monthEnd->modify('-1 day');
+$calendarEnd = $lastDayOfMonth->modify('friday this week');
 $calendarDays = [];
-for ($i = 0; $i < 42; $i++) {
-    $calendarDays[] = $calendarStart->modify('+' . $i . ' days');
+$currentDay = $calendarStart;
+while ($currentDay <= $calendarEnd) {
+    if ((int) $currentDay->format('N') <= 5) {
+        $calendarDays[] = $currentDay;
+    }
+    $currentDay = $currentDay->modify('+1 day');
 }
 
 $reservationsByDate = [];
@@ -208,12 +282,14 @@ try {
         }
         $dateKey = $reservedAt->format('Y-m-d');
         $reservationItem = [
+            'id' => (int) $row['id'],
             'time' => $reservedAt->format('H:i'),
             'room' => $row['room'],
             'room_label' => $validRooms[$row['room']] ?? $row['room'],
             'reserved_for' => $row['reserved_for'],
             'note' => $row['note'] ?? '',
             'document_path' => $row['document_path'],
+            'reserved_at' => $reservedAt,
         ];
         $reservationsByDate[$dateKey][] = $reservationItem;
     }
@@ -282,7 +358,7 @@ $selectedDayLabel = $selectedDate->format('Y年n月j日') . '（' . $weekdayLabe
           <a class="admin-calendar-month-bar__link" href="admin_calendar.php?year=<?= $nextMonth->format('Y') ?>&amp;month=<?= $nextMonth->format('n') ?>&amp;selected_date=<?= htmlspecialchars($nextSelectedDate->format('Y-m-d'), ENT_QUOTES, 'UTF-8') ?>" aria-label="次の月へ">&rarr;</a>
         </div>
         <div class="admin-calendar-grid" role="grid">
-          <?php foreach (['日','月','火','水','木','金','土'] as $weekday): ?>
+          <?php foreach (['月','火','水','木','金'] as $weekday): ?>
             <div class="admin-calendar-grid__header" role="columnheader"><?= $weekday ?></div>
           <?php endforeach; ?>
           <?php foreach ($calendarDays as $day): ?>
@@ -316,6 +392,14 @@ $selectedDayLabel = $selectedDate->format('Y年n月j日') . '（' . $weekdayLabe
           <?php if ($reservationsForSelectedDate): ?>
             <ul class="admin-calendar-reservations">
               <?php foreach ($reservationsForSelectedDate as $reservation): ?>
+                <?php
+                  $reservationDateObject = $reservation['reserved_at'] instanceof DateTimeImmutable ? $reservation['reserved_at'] : null;
+                  $reservationDateValue = $reservationDateObject ? $reservationDateObject->format('Y-m-d') : $selectedDate->format('Y-m-d');
+                  $reservationLabel = $reservationDateObject ? $reservationDateObject->format('Y/m/d H:i') : '';
+                  $confirmationMessage = $reservationLabel !== ''
+                      ? $reservationLabel . ' の予約を削除しますか？'
+                      : 'この予約を削除しますか？';
+                ?>
                 <li class="admin-calendar-reservations__item">
                   <div class="admin-calendar-reservations__time"><?= htmlspecialchars($reservation['time'], ENT_QUOTES, 'UTF-8') ?></div>
                   <div class="admin-calendar-reservations__body">
@@ -326,6 +410,17 @@ $selectedDayLabel = $selectedDate->format('Y年n月j日') . '（' . $weekdayLabe
                     <?php endif; ?>
                     <?php if (!empty($reservation['document_path'])): ?>
                       <a class="admin-calendar-reservations__attachment" href="<?= htmlspecialchars($reservation['document_path'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">📄 添付PDF</a>
+                    <?php endif; ?>
+                    <?php if (!empty($reservation['id'])): ?>
+                      <div class="admin-calendar-reservations__actions">
+                        <form method="post" class="admin-calendar-reservations__delete-form" onsubmit="return confirm('<?= htmlspecialchars($confirmationMessage, ENT_QUOTES, 'UTF-8') ?>');">
+                          <input type="hidden" name="delete_reservation_id" value="<?= (int) $reservation['id'] ?>">
+                          <input type="hidden" name="current_year" value="<?= (int) $monthStart->format('Y') ?>">
+                          <input type="hidden" name="current_month" value="<?= (int) $monthStart->format('n') ?>">
+                          <input type="hidden" name="selected_date" value="<?= htmlspecialchars($reservationDateValue, ENT_QUOTES, 'UTF-8') ?>">
+                          <button type="submit" class="reservation-button reservation-button--danger">削除</button>
+                        </form>
+                      </div>
                     <?php endif; ?>
                   </div>
                 </li>

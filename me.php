@@ -13,7 +13,11 @@ if ($isAdmin) {
 
 $displayName = $user['display_name'] ?? '';
 
-$validRooms = ['small' => '小会議室', 'large' => '大会議室'];
+$validRooms = [
+    'small' => '小会議室',
+    'large' => '大会議室',
+    'other' => 'その他',
+];
 $daysOfWeek = [
     1 => '月',
     2 => '火',
