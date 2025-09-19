@@ -10,6 +10,7 @@ $roleLabel = ($user['role'] ?? '') === 'admin' ? '管理者' : '一般ユーザ�
 $validRooms = [
     'large' => '大会議室',
     'small' => '小会議室',
+    'other' => 'その他',
 ];
 
 $room = isset($_GET['room']) ? (string) $_GET['room'] : '';
@@ -34,7 +35,7 @@ $weekStart = $baseDate->setTime(0, 0)->modify('Monday this week');
 $weekEnd = $weekStart->modify('+5 days');
 
 $days = [];
-for ($i = 0; $i < 7; $i++) {
+for ($i = 0; $i < 5; $i++) {
     $day = $weekStart->modify("+{$i} days");
     $days[] = $day;
 }
@@ -48,7 +49,7 @@ $reservationMap = [];
 $errorMessage = '';
 try {
     $pdo = getPdo();
-    $stmt = $pdo->prepare('SELECT reserved_at, reserved_for, note, document_path FROM reservations WHERE room = :room AND reserved_at >= :start AND reserved_at < :end ORDER BY reserved_at');
+$stmt = $pdo->prepare('SELECT id, user_id, reserved_at, reserved_for, note, document_path FROM reservations WHERE room = :room AND reserved_at >= :start AND reserved_at < :end ORDER BY reserved_at');
     $stmt->execute([
         ':room' => $room,
         ':start' => $weekStart->format('Y-m-d H:i:s'),
@@ -61,9 +62,12 @@ try {
         }
         $slotKey = $reservedAt->format('Y-m-d\TH:i');
         $reservationMap[$slotKey] = [
+            'id' => (int) $row['id'],
+            'user_id' => (int) $row['user_id'],
             'reserved_for' => $row['reserved_for'],
             'note' => $row['note'] ?? '',
             'document_path' => $row['document_path'] ?? null,
+            'reserved_at' => $reservedAt,
         ];
     }
 } catch (Throwable $exception) {
@@ -165,6 +169,9 @@ $todayKey = $today->format('Y-m-d');
                     <?php
                       $initial = mb_substr($reservation['reserved_for'], 0, 1, 'UTF-8');
                       $note = $reservation['note'] !== '' ? $reservation['note'] : $reservation['reserved_for'];
+                      $reservedAtObject = $reservation['reserved_at'] instanceof DateTimeImmutable ? $reservation['reserved_at'] : null;
+                      $reservedAtLabel = $reservedAtObject ? $reservedAtObject->format('Y/m/d H:i') : '';
+                      $canDelete = (($user['role'] ?? '') === 'admin') || ((int) ($reservation['user_id'] ?? 0) === (int) ($user['id'] ?? 0));
                     ?>
                     <div class="reservation-chip" title="<?= htmlspecialchars($reservation['reserved_for'], ENT_QUOTES, 'UTF-8') ?>">
                       <span class="reservation-chip__icon" aria-hidden="true"><?= htmlspecialchars($initial, ENT_QUOTES, 'UTF-8') ?></span>
@@ -173,6 +180,17 @@ $todayKey = $today->format('Y-m-d');
                         <span class="reservation-chip__meta">担当：<?= htmlspecialchars($reservation['reserved_for'], ENT_QUOTES, 'UTF-8') ?></span>
                         <?php if (!empty($reservation['document_path'])): ?>
                           <a class="reservation-chip__attachment" href="<?= htmlspecialchars($reservation['document_path'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" rel="noopener">📄 資料を見る</a>
+                        <?php endif; ?>
+                        <?php if ($canDelete && isset($reservation['id'])): ?>
+                          <div class="reservation-chip__actions">
+                            <button
+                              type="button"
+                              class="reservation-chip__delete"
+                              data-reservation-delete="<?= (int) $reservation['id'] ?>"
+                              data-reservation-label="<?= htmlspecialchars($reservedAtLabel, ENT_QUOTES, 'UTF-8') ?>"
+                              aria-label="<?= htmlspecialchars(($reservedAtLabel !== '' ? $reservedAtLabel . 'の予約を削除' : '予約を削除'), ENT_QUOTES, 'UTF-8') ?>"
+                            >削除</button>
+                          </div>
                         <?php endif; ?>
                       </div>
                     </div>
@@ -205,7 +223,7 @@ $todayKey = $today->format('Y-m-d');
     <div class="reservation-modal__overlay" data-close-modal></div>
     <div class="reservation-modal__content">
       <h2 class="reservation-modal__title">予約の作成</h2>
-      <form id="reservationForm" class="reservation-form" data-room="<?= htmlspecialchars($room, ENT_QUOTES, 'UTF-8') ?>" data-endpoint="reservation_calendar_api.php">
+      <form id="reservationForm" class="reservation-form" data-room="<?= htmlspecialchars($room, ENT_QUOTES, 'UTF-8') ?>" data-endpoint="reservation_calendar_api.php" data-delete-endpoint="reservation_delete_api.php">
         <label class="reservation-form__field">
           <span class="reservation-form__label">日時</span>
           <input type="datetime-local" id="reservationDateTime" name="reserved_at" required>

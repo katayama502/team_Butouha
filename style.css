@@ -786,6 +786,30 @@ main {
   text-decoration: underline;
 }
 
+.reservation-chip__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.reservation-chip__delete {
+  border: none;
+  border-radius: 999px;
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.reservation-chip__delete:hover,
+.reservation-chip__delete:focus {
+  background: rgba(255, 255, 255, 0.32);
+  transform: translateY(-1px);
+}
+
 .calendar-legend {
   margin: 16px 0 0;
   font-size: 0.9rem;
@@ -927,6 +951,18 @@ main {
 .reservation-button--sub:hover,
 .reservation-button--sub:focus {
   background: #e0e0e0;
+}
+
+.reservation-button--danger {
+  background: linear-gradient(135deg, #fca5a5, #ef4444);
+  color: #fff;
+  box-shadow: 0 8px 16px rgba(239, 68, 68, 0.18);
+}
+
+.reservation-button--danger:hover,
+.reservation-button--danger:focus {
+  background: linear-gradient(135deg, #f87171, #dc2626);
+  box-shadow: 0 10px 20px rgba(220, 38, 38, 0.25);
 }
 
 @media (max-width: 768px) {
@@ -1612,7 +1648,7 @@ main {
 .admin-calendar-grid {
   margin-top: 24px;
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -1758,6 +1794,16 @@ main {
   color: #1d4ed8;
 }
 
+.admin-calendar-reservations__actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 12px;
+}
+
+.admin-calendar-reservations__delete-form {
+  margin: 0;
+}
+
 .admin-calendar-form__form {
   display: flex;
   flex-direction: column;
@@ -1836,6 +1882,7 @@ main {
   }
 
   .admin-calendar-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;
   }
 
@@ -1854,6 +1901,10 @@ main {
   .admin-calendar-form {
     padding: 20px;
     border-radius: 22px;
+  }
+
+  .admin-calendar-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .admin-calendar-grid__cell {

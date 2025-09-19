@@ -14,6 +14,8 @@
 
   const endpoint = form.dataset.endpoint || form.getAttribute('action') || 'reservation_calendar_api.php';
   const room = form.dataset.room || '';
+  const deleteEndpoint = form.dataset.deleteEndpoint || 'reservation_delete_api.php';
+  const deleteButtons = document.querySelectorAll('[data-reservation-delete]');
 
   function setMessage(text, isError = false) {
     if (!messageArea) {
@@ -70,6 +72,57 @@
     if (event.target && event.target.matches('.reservation-modal__overlay')) {
       closeModal();
     }
+  });
+
+  deleteButtons.forEach((button) => {
+    button.addEventListener('click', async () => {
+      const reservationId = button.dataset.reservationDelete;
+      if (!reservationId) {
+        return;
+      }
+      const reservationLabel = button.dataset.reservationLabel || '';
+      const confirmationText = reservationLabel
+        ? `${reservationLabel} の予約を削除しますか？`
+        : 'この予約を削除しますか？';
+      if (!window.confirm(confirmationText)) {
+        return;
+      }
+
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = '削除中...';
+      setMessage('予約を削除しています...');
+
+      try {
+        const response = await fetch(deleteEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          body: JSON.stringify({
+            reservation_id: reservationId,
+          }),
+        });
+
+        const payload = await response.json();
+        if (!response.ok || !payload.success) {
+          const message = payload && payload.error ? payload.error : '予約の削除に失敗しました。';
+          setMessage(message, true);
+          return;
+        }
+
+        setMessage(payload.message || '予約を削除しました。');
+        window.setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } catch (error) {
+        setMessage('通信中にエラーが発生しました。時間をおいて再度お試しください。', true);
+      } finally {
+        button.disabled = false;
+        button.textContent = originalText;
+      }
+    });
   });
 
   form.addEventListener('submit', async (event) => {
