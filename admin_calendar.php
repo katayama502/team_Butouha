@@ -10,6 +10,7 @@ $displayName = $user['display_name'] ?? '';
 $validRooms = [
     'large' => '大会議室',
     'small' => '小会議室',
+    'other' => 'その他'
 ];
 
 $timezone = new DateTimeZone('Asia/Tokyo');
@@ -241,7 +242,7 @@ $selectedDayLabel = $selectedDate->format('Y年n月j日') . '（' . $weekdayLabe
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>会議室カレンダー | 高橋建設</title>
+  <title>予定カレンダー | 高橋建設</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="page-admin-calendar">
@@ -249,8 +250,8 @@ $selectedDayLabel = $selectedDate->format('Y年n月j日') . '（' . $weekdayLabe
     <div class="admin-calendar-header__inner">
       <a class="back-link" href="index.php">&larr; 管理トップに戻る</a>
       <div class="admin-calendar-header__titles">
-        <h1 class="admin-calendar-title">会議室カレンダー</h1>
-        <p class="admin-calendar-subtitle">カレンダーから日付を選んで、PDF資料付きで予約を登録できます。</p>
+        <h1 class="admin-calendar-title">予定カレンダー</h1>
+        <p class="admin-calendar-subtitle">カレンダーから日付を選んで、PDF資料付きで予定を登録できます。</p>
       </div>
       <div class="user-menu">
         <span class="user-menu__label">ようこそ、<?= htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8') ?>さん（管理者）</span>

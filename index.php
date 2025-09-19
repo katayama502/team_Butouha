@@ -48,7 +48,7 @@ try {
   <header class="home-header">
     <div class="user-menu">
       <span class="user-menu__label">ようこそ、<?= htmlspecialchars($user['display_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>さん（<?= ($user['role'] ?? '') === 'admin' ? '管理者' : '一般ユーザー' ?>）</span>
-      <a class="user-menu__link" href="admin_calendar.php">会議室を予約</a>
+      <a class="user-menu__link" href="admin_calendar.php">予定を予約</a>
       <a class="user-menu__link" href="logout.php">ログアウト</a>
     </div>
     <h1 class="main-title">お知らせ</h1>
@@ -85,7 +85,7 @@ try {
 
     <section class="cta-section">
       <a href="form.php" class="cta-button">重要なお知らせ一覧を見る</a>
-      <a href="admin_calendar.php" class="cta-button secondary">会議室の予約状況</a>
+      <a href="admin_calendar.php" class="cta-button secondary">予定状況</a>
     </section>
   </main>
 </body>

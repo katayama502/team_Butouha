@@ -86,8 +86,7 @@ try {
   </header>
 
   <main class="user-home-main">
-    <section class="user-home-actions" aria-labelledby="quickLinks">
-      <h2 id="quickLinks" class="user-home-section-title">クイックアクセス</h2>
+    <section class="user-home-actions" aria-labelledby="quickLinks"><br>
       <div class="user-home-buttons">
         <a class="user-home-button user-home-button--reserve" href="reservations_select.php">会議室を予約</a>
         <a class="user-home-button user-home-button--important" href="form.php">重要なお知らせを見る</a>

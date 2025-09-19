@@ -44,7 +44,7 @@ main {
 }
 
 .back-link {
-  color: var(--color-primary);
+  color:black;
   font-weight: bold;
 }
 
@@ -1277,11 +1277,11 @@ main {
 }
 
 .user-menu__label {
-  color: #555;
+  color: black;
 }
 
 .user-menu__link {
-  color: var(--color-primary);
+  color:black;
   font-weight: bold;
 }
 
@@ -1924,3 +1924,14 @@ main {
     padding: 20px;
   }
 }
+.contribution-label{
+position: fixed;
+    top: 24px;
+    left: 24px;
+    font-size: 45px;
+    font-weight: bold;
+    color: #388e3c;
+    user-select: none;
+    z-index: 10
+}
+    

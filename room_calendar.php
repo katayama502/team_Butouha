@@ -30,8 +30,8 @@ if ($weekStartParam !== '') {
     }
 }
 
-$weekStart = $baseDate->setTime(0, 0)->modify('monday this week');
-$weekEnd = $weekStart->modify('+7 days');
+$weekStart = $baseDate->setTime(0, 0)->modify('Monday this week');
+$weekEnd = $weekStart->modify('+5 days');
 
 $days = [];
 for ($i = 0; $i < 7; $i++) {
@@ -40,7 +40,7 @@ for ($i = 0; $i < 7; $i++) {
 }
 
 $timeSlots = [];
-for ($hour = 8; $hour <= 18; $hour++) {
+for ($hour = 8; $hour <= 16; $hour++) {
     $timeSlots[] = sprintf('%02d:00', $hour);
 }
 
@@ -72,13 +72,13 @@ try {
 
 function formatDayLabel(DateTimeImmutable $date): string
 {
-    static $weekdayMap = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    static $weekdayMap = ['日','月', '火', '水', '木', '金','土'];
     return $date->format('n/j') . ' (' . $weekdayMap[(int) $date->format('w')] . ')';
 }
 
 function formatRangeLabel(DateTimeImmutable $start, DateTimeImmutable $end): string
 {
-    static $weekdayMap = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    static $weekdayMap = ['日','月', '火', '水', '木', '金','土'];
     $endPrev = $end->modify('-1 day');
     return $start->format('Y/m/d') . ' (' . $weekdayMap[(int) $start->format('w')] . ') ~ ' . $endPrev->format('Y/m/d') . ' (' . $weekdayMap[(int) $endPrev->format('w')] . ')';
 }
